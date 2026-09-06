@@ -68,16 +68,50 @@ h3,
 /* ============================================================================
    APP SHELL / HEADER
    ========================================================================== */
-.app-header {
+.app-header-wrap {
   position: sticky;
   top: 0;
   z-index: 50;
+  background: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.app-header {
   display: flex;
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-sm) var(--space-md);
-  background: var(--color-surface-1);
   border-bottom: 1px solid var(--color-line);
+}
+
+/* primary nav strip — scrollable on mobile */
+.app-nav {
+  display: flex;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-md);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.app-nav::-webkit-scrollbar {
+  display: none;
+}
+.app-nav-link {
+  flex: 0 0 auto;
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-mute);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.app-nav-link:hover {
+  color: var(--color-ink-dim);
+}
+.app-nav-link[aria-current="page"] {
+  color: var(--color-ink);
+  background: var(--color-surface-3);
 }
 
 .wordmark {
@@ -190,7 +224,7 @@ h3,
    ========================================================================== */
 .filter-bar {
   position: sticky;
-  top: 57px;
+  top: 96px; /* top bar (~55px) + nav strip (~41px) */
   z-index: 40;
   display: flex;
   flex-wrap: wrap;
