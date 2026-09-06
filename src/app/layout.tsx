@@ -3,6 +3,8 @@ import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AppHeader } from "@/components/AppHeader";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { AuthProvider } from "@/features/auth/AuthProvider";
+import { getCurrentProfile } from "@/features/auth/session";
 
 const display = Space_Grotesk({
   variable: "--font-display",
@@ -38,15 +40,19 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const profile = await getCurrentProfile();
+
   return (
     <html
       lang="en"
       className={`${display.variable} ${body.variable} ${mono.variable}`}
     >
       <body>
-        <AppHeader />
-        <main>{children}</main>
+        <AuthProvider profile={profile}>
+          <AppHeader />
+          <main>{children}</main>
+        </AuthProvider>
         <ServiceWorkerRegister />
       </body>
     </html>

@@ -1,0 +1,280 @@
+/* Auth route-group shell + form primitives. Tokens only. */
+
+.shell {
+  min-height: calc(100dvh - 96px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md) var(--space-3xl);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 400px) {
+  .card {
+    padding: var(--space-lg);
+  }
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.title {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sub {
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+
+.input {
+  appearance: none;
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.input::placeholder {
+  color: var(--color-ink-mute);
+}
+.input:hover {
+  border-color: var(--color-ink-mute);
+}
+.input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.fieldError {
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.hint {
+  color: var(--color-ink-dim);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+.hint.ok {
+  color: var(--color-ok);
+}
+.hint.warn {
+  color: var(--color-warn);
+}
+
+/* form-level status region */
+.formError,
+.formOk {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+}
+.formError {
+  color: var(--color-ink);
+  background: var(--game-valorant-dim);
+  border-color: var(--color-danger);
+}
+.formOk {
+  color: var(--color-ink);
+  background: var(--game-dota-dim);
+  border-color: var(--color-ok);
+}
+
+/* role radio cards */
+.roleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.roleCard {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-1);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.roleCard:hover {
+  border-color: var(--color-ink-mute);
+}
+.roleCard:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.roleCard:has(input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-surface-2);
+}
+.roleCard input {
+  margin-top: 3px;
+  accent-color: var(--color-accent);
+  flex: 0 0 auto;
+}
+.roleText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.roleName {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+.roleDesc {
+  color: var(--color-ink-dim);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+/* submit button — 8 states */
+.submit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  width: 100%;
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  color: var(--color-accent-ink);
+  background: var(--color-accent);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  transition:
+    filter var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.submit:hover {
+  filter: brightness(1.08);
+}
+.submit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.submit:active {
+  transform: translateY(1px);
+  filter: brightness(0.94);
+}
+.submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+.submit[data-loading="true"] {
+  color: transparent;
+  pointer-events: none;
+}
+.submit[data-loading="true"]::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid var(--color-accent-ink);
+  border-top-color: transparent;
+  animation: auth-spin 0.7s linear infinite;
+}
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.altRow {
+  font-size: var(--text-sm);
+  color: var(--color-ink-dim);
+  text-align: center;
+}
+.altRow a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.altRow a:hover {
+  color: var(--color-accent);
+}
+
+/* "check your email" success panel */
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  text-align: center;
+}
+.noticeIcon {
+  align-self: center;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--game-dota-dim);
+  color: var(--color-ok);
+}
