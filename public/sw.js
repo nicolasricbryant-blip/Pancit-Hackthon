@@ -2,8 +2,8 @@
    Minimal cache-first app shell for installability + basic offline.
    No push, no background sync yet. */
 
-const CACHE = "tambayan-shell-v1";
-const SHELL = ["/", "/manifest.webmanifest", "/icons/tambayan.svg"];
+const CACHE = "tambayan-shell-v2";
+const SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

@@ -1,11 +1,13 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import type { Database } from "@/lib/db/types";
 
 /**
  * Server-side Supabase client (Server Components, Route Handlers, Server Actions).
  *
- * STUB (milestone 1): standard `@supabase/ssr` cookie wiring, but NOT connected
- * to a real project yet. See `.env.local.example`. No caller in milestone 1.
+ * Wired to the live project with standard `@supabase/ssr` cookie handling. Typed
+ * with the generated `Database` schema. Session refresh happens in `src/proxy.ts`;
+ * a Server Component render can't write cookies, so `setAll` is a safe no-op there.
  */
 export async function createClient() {
   const cookieStore = await cookies();
@@ -20,7 +22,7 @@ export async function createClient() {
     );
   }
 
-  return createServerClient(url, anonKey, {
+  return createServerClient<Database>(url, anonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -31,7 +33,7 @@ export async function createClient() {
             cookieStore.set(name, value, options),
           );
         } catch {
-          // called from a Server Component — safe to ignore when middleware
+          // called from a Server Component — safe to ignore when the proxy
           // refreshes the session.
         }
       },

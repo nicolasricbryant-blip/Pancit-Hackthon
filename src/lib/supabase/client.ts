@@ -1,11 +1,11 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/lib/db/types";
 
 /**
- * Browser-side Supabase client.
+ * Browser-side Supabase client (Client Components).
  *
- * STUB (milestone 1): reads the two public env vars but is NOT wired to a real
- * project yet. See `.env.local.example`. Nothing in the app calls this path
- * until auth/data land in a later milestone.
+ * Wired to the live project via NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY. Typed with
+ * the generated `Database` schema so every query is checked at compile time.
  */
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,5 +18,5 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient(url, anonKey);
+  return createBrowserClient<Database>(url, anonKey);
 }
