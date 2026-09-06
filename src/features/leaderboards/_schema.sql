@@ -1,0 +1,87 @@
+-- ============================================================================
+-- TAMBAYAN · Leaderboards feature — schema notes
+-- ============================================================================
+-- NO migration is required for this feature. It is public read-only and reads
+-- existing tables only:
+--     ratings, reliability_scores, community_standing,
+--     teams, profiles, schools, game_profiles
+--
+-- 14 TEAM rows are already seeded across the 4 games. There are no PLAYER
+-- (profile_id) rows in `ratings` yet, so the Player board renders a clean empty
+-- state until the seed below is applied against real profiles.
+-- ============================================================================
+
+
+-- ----------------------------------------------------------------------------
+-- OPTIONAL — supporting indexes (safe, non-breaking). Apply only if the board
+-- feels slow at scale; the current dataset does not need them.
+-- ----------------------------------------------------------------------------
+-- create index if not exists ratings_game_team_idx
+--   on public.ratings (game_id, team_id) where team_id is not null;
+-- create index if not exists ratings_game_profile_idx
+--   on public.ratings (game_id, profile_id) where profile_id is not null;
+-- create index if not exists reliability_scores_team_idx
+--   on public.reliability_scores (team_id) where team_id is not null;
+-- create index if not exists reliability_scores_profile_idx
+--   on public.reliability_scores (profile_id) where profile_id is not null;
+-- create index if not exists community_standing_team_idx
+--   on public.community_standing (team_id) where team_id is not null;
+-- create index if not exists community_standing_profile_idx
+--   on public.community_standing (profile_id) where profile_id is not null;
+-- create index if not exists game_profiles_game_profile_idx
+--   on public.game_profiles (game_id, profile_id);
+
+
+-- ----------------------------------------------------------------------------
+-- DEMO SEED — ~8 PLAYER ratings + matching game_profiles.
+--
+-- Profile ids are not known at build time, so this is parameterised and left
+-- COMMENTED. To run it: create/pick 8 real rows in public.profiles, drop their
+-- uuids into the VALUES list below (keep display_name/handle/school_id/region
+-- populated on those profile rows so the board's joins render), pick a game_id
+-- from ('mlbb','valorant','dota','codm'), then uncomment and execute.
+--
+-- Ratings spread ~1400–2100 to match the existing team seed. verification_status
+-- is one of ('unverified','pending','verified'); 'verified' shows the badge.
+-- ----------------------------------------------------------------------------
+
+-- do $$
+-- declare
+--   v_game text := 'mlbb';  -- <-- target game
+--   -- (profile_id, rating, wins, losses, rank_label, verification_status)
+--   v_rows record;
+-- begin
+--   for v_rows in
+--     select * from (values
+--       ('00000000-0000-0000-0000-000000000001'::uuid, 2040, 61, 22, 'Mythical Immortal', 'verified'),
+--       ('00000000-0000-0000-0000-000000000002'::uuid, 1985, 54, 27, 'Mythical Honor',    'verified'),
+--       ('00000000-0000-0000-0000-000000000003'::uuid, 1922, 48, 31, 'Mythical Honor',    'pending'),
+--       ('00000000-0000-0000-0000-000000000004'::uuid, 1870, 44, 33, 'Mythical Glory',    'verified'),
+--       ('00000000-0000-0000-0000-000000000005'::uuid, 1795, 39, 36, 'Mythical Glory',    'unverified'),
+--       ('00000000-0000-0000-0000-000000000006'::uuid, 1710, 33, 38, 'Mythic',            'pending'),
+--       ('00000000-0000-0000-0000-000000000007'::uuid, 1620, 28, 41, 'Mythic',            'verified'),
+--       ('00000000-0000-0000-0000-000000000008'::uuid, 1505, 21, 45, 'Mythic',            'unverified')
+--     ) as t(profile_id, rating, wins, losses, rank_label, verification_status)
+--   loop
+--     insert into public.ratings
+--       (game_id, profile_id, rating, matches_played, wins, losses, seeded_from_rank)
+--     values
+--       (v_game, v_rows.profile_id, v_rows.rating,
+--        v_rows.wins + v_rows.losses, v_rows.wins, v_rows.losses, v_rows.rank_label)
+--     on conflict do nothing;
+--
+--     insert into public.game_profiles
+--       (game_id, profile_id, rank_label, verification_status)
+--     values
+--       (v_game, v_rows.profile_id, v_rows.rank_label, v_rows.verification_status)
+--     on conflict do nothing;
+--
+--     -- optional: give the player a community_standing row so the Standing sort
+--     -- axis has data too.
+--     insert into public.community_standing
+--       (profile_id, points, events_attended, events_hosted)
+--     values
+--       (v_rows.profile_id, (v_rows.rating - 1400) / 5, 3, 0)
+--     on conflict do nothing;
+--   end loop;
+-- end $$;

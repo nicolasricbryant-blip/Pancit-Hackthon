@@ -1,0 +1,258 @@
+/* Leaderboards — dense broadcast standings table. Tokens only (tokens.css).
+   Colocated with the feature; imported by the route page and the board views. */
+
+/* ── controls row ─────────────────────────────────────────────────────────── */
+.controls {
+  position: sticky;
+  top: 96px; /* top bar (~55px) + nav strip (~41px) — matches .filter-bar */
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: flex-end;
+  padding: var(--space-sm) 0 var(--space-md);
+  background: var(--color-paper);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+.fieldLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+
+/* ── segmented control — mirrors .game-switcher / .game-seg ────────────────── */
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+}
+.seg::-webkit-scrollbar {
+  display: none;
+}
+.segItem {
+  flex: 0 0 auto;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-mute);
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.segItem:hover {
+  color: var(--color-ink-dim);
+}
+.segItem:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.segItem:active {
+  transform: translateY(1px);
+}
+.segItem[aria-checked="true"] {
+  color: var(--game-current);
+  background: var(--game-current-dim);
+  border-bottom-color: var(--game-current);
+}
+.segItem[aria-checked="true"]:hover {
+  color: var(--game-current);
+}
+.segItem:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── select — mirrors .filter-select ─────────────────────────────────────── */
+.select {
+  appearance: none;
+  max-width: 15rem;
+  background: var(--color-surface-1)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a8f99' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")
+    no-repeat right var(--space-sm) center;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: var(--space-xs) calc(var(--space-md) + 12px) var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.select:hover {
+  border-color: var(--color-ink-mute);
+}
+.select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── table ───────────────────────────────────────────────────────────────── */
+.scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-1);
+}
+.table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface-2);
+  color: var(--color-ink-mute);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: left;
+  white-space: nowrap;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-line);
+}
+.table tbody td {
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-ink);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-line);
+}
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* zebra via surface tokens */
+.row:nth-child(odd) {
+  background: var(--color-surface-1);
+}
+.row:nth-child(even) {
+  background: var(--color-surface-2);
+}
+.row:hover {
+  background: var(--color-surface-3);
+}
+/* top-3 accent */
+.row[data-top="true"] {
+  box-shadow: inset 3px 0 0 var(--game-current);
+}
+.row[data-top="true"] .rank {
+  color: var(--game-current);
+}
+
+/* numeric cells */
+.num {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: right;
+}
+th.num {
+  text-align: right;
+}
+.rankCol {
+  width: 3rem;
+}
+.rank {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--color-ink-dim);
+}
+th.rankCol {
+  text-align: right;
+}
+
+/* name cell + stretched row link */
+.nameCell {
+  position: relative;
+}
+.rowLink {
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.rowLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.rowLink:hover {
+  color: var(--game-current);
+}
+.rowLink:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.playerName {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.tag,
+.handle {
+  color: var(--color-ink-mute);
+  font-weight: 400;
+}
+.verified {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-left: var(--space-2xs);
+  color: var(--color-verified);
+}
+
+/* skeleton */
+.sk {
+  display: block;
+  height: 12px;
+  width: 80%;
+  border-radius: var(--radius-sm);
+}
+
+/* empty state */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-3xl) var(--space-md);
+  text-align: center;
+  color: var(--color-ink-dim);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 480px) {
+  .controls {
+    position: static;
+    gap: var(--space-sm);
+  }
+}
