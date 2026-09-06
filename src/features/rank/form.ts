@@ -14,6 +14,8 @@ export interface RankFormField {
   key: string;
   label: string;
   type: RankFieldType;
+  /** Explicit option list for a `select` — overrides the tier/rank heuristic. */
+  options?: string[];
 }
 
 export type VerificationStatus =
@@ -48,7 +50,12 @@ export function coerceFormFields(json: Json | null | undefined): RankFormField[]
       rec.type === "select" || rec.type === "number" || rec.type === "text"
         ? rec.type
         : null;
-    if (key && label && type) out.push({ key, label, type });
+    const options = Array.isArray(rec.options)
+      ? rec.options.filter((v): v is string => typeof v === "string")
+      : undefined;
+    if (key && label && type) {
+      out.push({ key, label, type, ...(options && options.length ? { options } : {}) });
+    }
   }
   return out;
 }
@@ -69,7 +76,8 @@ export function selectOptions(
   rankTiers: string[],
 ): string[] | null {
   if (field.type !== "select") return null;
-  return /tier|rank/i.test(field.key) ? rankTiers : null;
+  if (field.options && field.options.length) return field.options;
+  return /tier|rank|peak/i.test(field.key) ? rankTiers : null;
 }
 
 /** True when a field renders as a plain text input (text type, or optionless select). */

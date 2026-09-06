@@ -272,6 +272,36 @@
   color: var(--color-ok);
 }
 
+/* "· optional" suffix on a field label */
+.optional {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-ink-mute);
+  font-weight: 400;
+}
+
+/* inline text button — "My school isn't listed" / "Pick from the list instead" */
+.linkBtn {
+  align-self: flex-start;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: var(--text-xs);
+  padding: 2px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.linkBtn:hover {
+  filter: brightness(1.1);
+}
+.linkBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .submit {
   position: relative;
   display: inline-flex;

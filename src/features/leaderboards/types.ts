@@ -11,6 +11,14 @@ export type BoardKind = "team" | "player";
 /** Sort axis — a product pillar: skill (rating) vs. community (standing). URL param `?sort=`. */
 export type SortKey = "rating" | "standing";
 
+/**
+ * Top-level reach of the board. URL param `?scope=`.
+ * - `nationwide` — every team/player in the game (default)
+ * - `regional` — narrowed to a region (explicit `?region=` or the viewer's own)
+ * - `school` — narrowed to the signed-in viewer's school
+ */
+export type ScopeKind = "nationwide" | "regional" | "school";
+
 type Param = string | string[] | undefined;
 
 function first(v: Param): string | undefined {
@@ -23,6 +31,11 @@ export function coerceBoard(v: Param): BoardKind {
 
 export function coerceSort(v: Param): SortKey {
   return first(v) === "standing" ? "standing" : "rating";
+}
+
+export function coerceScope(v: Param): ScopeKind {
+  const raw = first(v);
+  return raw === "regional" || raw === "school" ? raw : "nationwide";
 }
 
 /** Plain string searchParam (region / school id), empty string = unset. */

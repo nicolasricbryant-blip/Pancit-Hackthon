@@ -10,16 +10,24 @@ import type { Database } from "@/lib/db/types";
  */
 
 /** Auth-required path prefixes. Everything else the matcher hits is public. */
-const AUTH_PREFIXES = ["/onboarding", "/settings", "/rank", "/matches"];
+const AUTH_PREFIXES = ["/onboarding", "/settings", "/rank", "/matches", "/mentorship"];
 
-/** Auth-required patterns under the otherwise-public /teams browse route. */
-const AUTH_TEAMS = [/^\/teams\/new(?:\/|$)/, /^\/teams\/[^/]+\/manage(?:\/|$)/];
+/** Auth-required patterns under otherwise-public browse routes. */
+const AUTH_PATTERNS = [
+  /^\/teams\/new(?:\/|$)/,
+  /^\/teams\/[^/]+\/manage(?:\/|$)/,
+  /^\/free-agents\/new(?:\/|$)/,
+  /^\/orgs\/new(?:\/|$)/,
+  /^\/orgs\/[^/]+\/manage(?:\/|$)/,
+  /^\/brackets\/new(?:\/|$)/,
+  /^\/brackets\/[^/]+\/manage(?:\/|$)/,
+];
 
 function needsAuth(pathname: string): boolean {
   if (AUTH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return true;
   }
-  return AUTH_TEAMS.some((re) => re.test(pathname));
+  return AUTH_PATTERNS.some((re) => re.test(pathname));
 }
 
 export async function proxy(request: NextRequest) {
@@ -61,7 +69,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(signIn);
   }
 
-  // 2 · first-run trap: authed but no school picked yet → force onboarding.
+  // 2 · first-run trap: authed but setup not finished → force onboarding.
+  //     Keyed on `profiles.onboarded`, NOT school_id — school is optional now, so
+  //     a tester on a non-.edu.ph address can finish without picking one.
   //     Exempt /onboarding itself and the sign-out route so the user isn't stuck.
   if (
     user &&
@@ -70,11 +80,11 @@ export async function proxy(request: NextRequest) {
   ) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("school_id")
+      .select("onboarded")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile && !profile.school_id) {
+    if (profile && !profile.onboarded) {
       const onboarding = request.nextUrl.clone();
       onboarding.pathname = "/onboarding";
       onboarding.search = "";

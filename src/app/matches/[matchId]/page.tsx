@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/features/auth/session";
 import { getMatchRoom } from "@/features/matches/queries";
 import { MatchRoom } from "@/features/matches/MatchRoom";
+import { H2HPanel } from "@/features/h2h/H2HPanel";
 
 type ScopeVars = React.CSSProperties & {
   "--game-current"?: string;
@@ -39,6 +40,13 @@ export default async function MatchRoomPage({
   return (
     <div style={scopeStyle} data-game={game}>
       <MatchRoom data={data} />
+      <H2HPanel
+        gameId={data.view.match.game_id}
+        teamA={data.view.teamA.id}
+        teamB={data.view.teamB.id}
+        teamAName={data.view.teamA.name}
+        teamBName={data.view.teamB.name}
+      />
     </div>
   );
 }

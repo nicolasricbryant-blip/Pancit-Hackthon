@@ -113,6 +113,13 @@
   cursor: not-allowed;
 }
 
+/* scope fallback note — sits between the controls row and the table */
+.note {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--color-ink-dim);
+}
+
 /* ── table ───────────────────────────────────────────────────────────────── */
 .scroll {
   overflow-x: auto;

@@ -1,0 +1,286 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 660" font-family="'Space Grotesk','Segoe UI',Arial,sans-serif">
+  <defs>
+    <style>
+      .paper{fill:#0d1015}
+      .s1{fill:#161a20}
+      .s2{fill:#1e232b}
+      .line{stroke:#333a45;stroke-width:1;fill:none}
+      .ink{fill:#f2f4f7}
+      .dim{fill:#a8afba}
+      .mute{fill:#7b828d}
+      .h{font-weight:700}
+      .num{font-family:'JetBrains Mono','Consolas',monospace}
+      .lbl{font-size:9px;letter-spacing:.08em;fill:#7b828d}
+      .cap{font-size:11px;fill:#a8afba}
+      .title{font-size:13px;font-weight:700;fill:#f2f4f7}
+    </style>
+    <clipPath id="scr"><rect x="0" y="0" width="244" height="486" rx="10"/></clipPath>
+  </defs>
+
+  <rect width="1360" height="660" class="paper"/>
+  <text x="20" y="26" class="ink h" font-size="16">TAMBAYAN</text>
+  <text x="145" y="26" class="mute" font-size="12">— Stage 1 wireframe · mobile PWA · all content game-scoped · dark / hue-coded</text>
+
+  <!-- ============ FRAME TEMPLATE via groups ============ -->
+  <!-- FRAME 1 · SCRIM FINDER (MLBB active) -->
+  <g transform="translate(20,44)">
+    <rect x="-6" y="-6" width="256" height="510" rx="20" class="s1" stroke="#333a45"/>
+    <g clip-path="url(#scr)">
+      <rect width="244" height="486" class="paper"/>
+      <!-- header -->
+      <rect width="244" height="52" class="s1"/>
+      <text x="14" y="24" class="ink h" font-size="12">TAMBAYAN</text>
+      <circle cx="150" cy="20" r="7" fill="#2bb3e0"/>
+      <circle cx="172" cy="20" r="7" fill="#33404a"/>
+      <circle cx="194" cy="20" r="7" fill="#33404a"/>
+      <circle cx="216" cy="20" r="7" fill="#33404a"/>
+      <text x="14" y="44" class="lbl">MLBB · VALORANT · DOTA 2 · CODM</text>
+      <line x1="0" y1="52" x2="244" y2="52" class="line"/>
+      <!-- page head -->
+      <text x="14" y="76" class="title">Scrim Finder</text>
+      <text x="14" y="92" class="cap" font-size="10">Teams available now — MLBB</text>
+      <!-- filter chips -->
+      <rect x="14" y="102" width="66" height="20" rx="10" class="s2" stroke="#333a45"/>
+      <text x="24" y="116" class="cap" font-size="9">Rank band ▾</text>
+      <rect x="86" y="102" width="60" height="20" rx="10" class="s2" stroke="#333a45"/>
+      <text x="95" y="116" class="cap" font-size="9">Tonight ▾</text>
+      <rect x="152" y="102" width="50" height="20" rx="10" class="s2" stroke="#333a45"/>
+      <text x="161" y="116" class="cap" font-size="9">BO3 ▾</text>
+      <!-- cards -->
+      <g transform="translate(14,134)">
+        <rect width="216" height="104" rx="10" class="s1" stroke="#333a45"/>
+        <rect width="3" height="104" rx="1.5" fill="#2bb3e0"/>
+        <text x="14" y="24" class="ink h" font-size="11">UP Fighting Maroons</text>
+        <text x="14" y="40" class="mute" font-size="9">University of the Philippines ✔</text>
+        <text x="14" y="62" class="dim num" font-size="10">RATING 1988   REL 96%</text>
+        <text x="14" y="78" class="mute" font-size="9">Mythical Glory–Honor · BO3</text>
+        <rect x="14" y="84" width="188" height="14" rx="7" fill="#2bb3e0"/>
+        <text x="108" y="94" text-anchor="middle" fill="#0d1015" font-size="8" class="h">REQUEST SCRIM</text>
+      </g>
+      <g transform="translate(14,248)">
+        <rect width="216" height="104" rx="10" class="s1" stroke="#333a45"/>
+        <rect width="3" height="104" rx="1.5" fill="#2bb3e0"/>
+        <text x="14" y="24" class="ink h" font-size="11">DLSU Green Gaming</text>
+        <text x="14" y="40" class="mute" font-size="9">De La Salle University ✔</text>
+        <text x="14" y="62" class="dim num" font-size="10">RATING 1902   REL 91%</text>
+        <text x="14" y="78" class="mute" font-size="9">Mythical Honor · BO5</text>
+        <rect x="14" y="84" width="188" height="14" rx="7" fill="#2bb3e0"/>
+        <text x="108" y="94" text-anchor="middle" fill="#0d1015" font-size="8" class="h">REQUEST SCRIM</text>
+      </g>
+      <g transform="translate(14,362)">
+        <rect width="216" height="104" rx="10" class="s1" stroke="#333a45"/>
+        <rect width="3" height="104" rx="1.5" fill="#2bb3e0"/>
+        <text x="14" y="24" class="ink h" font-size="11">Ateneo Blue Spark</text>
+        <text x="14" y="40" class="mute" font-size="9">Ateneo de Manila University</text>
+        <text x="14" y="62" class="dim num" font-size="10">RATING 1740   REL 84%</text>
+        <text x="14" y="78" class="mute" font-size="9">Mythic–Mythical Glory · Block</text>
+        <rect x="14" y="84" width="188" height="14" rx="7" fill="#2bb3e0"/>
+        <text x="108" y="94" text-anchor="middle" fill="#0d1015" font-size="8" class="h">REQUEST SCRIM</text>
+      </g>
+    </g>
+    <text x="122" y="524" text-anchor="middle" class="mute" font-size="10">1 · Scrim Finder (hero)</text>
+  </g>
+
+  <!-- FRAME 2 · RANK SUBMISSION (Valorant active) -->
+  <g transform="translate(289,44)">
+    <rect x="-6" y="-6" width="256" height="510" rx="20" class="s1" stroke="#333a45"/>
+    <g clip-path="url(#scr)">
+      <rect width="244" height="486" class="paper"/>
+      <rect width="244" height="52" class="s1"/>
+      <text x="14" y="24" class="ink h" font-size="12">TAMBAYAN</text>
+      <circle cx="150" cy="20" r="7" fill="#33404a"/>
+      <circle cx="172" cy="20" r="7" fill="#ff4655"/>
+      <circle cx="194" cy="20" r="7" fill="#33404a"/>
+      <circle cx="216" cy="20" r="7" fill="#33404a"/>
+      <text x="14" y="44" class="lbl">SUBMIT RANK · VALORANT</text>
+      <line x1="0" y1="52" x2="244" y2="52" class="line"/>
+      <text x="14" y="76" class="title">Submit your rank</text>
+      <text x="14" y="92" class="cap" font-size="10">Per-game fields — reviewed by a human</text>
+      <g transform="translate(14,104)">
+        <text y="10" class="lbl">CURRENT RANK</text>
+        <rect y="16" width="216" height="26" rx="6" class="s1" stroke="#333a45"/>
+        <text x="10" y="33" class="dim" font-size="10">Immortal ▾</text>
+        <text y="60" class="lbl">RANK RATING (RR)</text>
+        <rect y="66" width="216" height="26" rx="6" class="s1" stroke="#333a45"/>
+        <text x="10" y="83" class="dim num" font-size="10">312</text>
+        <text y="110" class="lbl">PEAK RANK</text>
+        <rect y="116" width="216" height="26" rx="6" class="s1" stroke="#333a45"/>
+        <text x="10" y="133" class="dim" font-size="10">Radiant ▾</text>
+      </g>
+      <g transform="translate(14,260)">
+        <text y="10" class="lbl">PROOF SCREENSHOT</text>
+        <rect y="16" width="216" height="86" rx="10" fill="none" stroke="#333a45" stroke-dasharray="4 4"/>
+        <text x="108" y="56" text-anchor="middle" class="mute" font-size="10">Drop image · PNG/JPG · ≤5 MB</text>
+        <text x="108" y="72" text-anchor="middle" class="mute" font-size="9">rank-proof-immortal.png</text>
+      </g>
+      <g transform="translate(14,372)">
+        <rect width="216" height="16" rx="8" fill="#1e232b" stroke="#e0a437"/>
+        <circle cx="14" cy="8" r="3" fill="#e0a437"/>
+        <text x="26" y="12" fill="#e0a437" font-size="9" class="h">PENDING REVIEW</text>
+        <text y="36" class="mute" font-size="9">States: Unverified · Pending · Verified · Rejected(+reason)</text>
+        <rect y="48" width="216" height="16" rx="8" fill="#9aa4b2"/>
+        <text x="108" y="60" text-anchor="middle" fill="#0d1015" font-size="8" class="h">SUBMIT FOR REVIEW</text>
+      </g>
+    </g>
+    <text x="122" y="524" text-anchor="middle" class="mute" font-size="10">2 · Rank Submission</text>
+  </g>
+
+  <!-- FRAME 3 · LEADERBOARDS (Dota active) -->
+  <g transform="translate(558,44)">
+    <rect x="-6" y="-6" width="256" height="510" rx="20" class="s1" stroke="#333a45"/>
+    <g clip-path="url(#scr)">
+      <rect width="244" height="486" class="paper"/>
+      <rect width="244" height="52" class="s1"/>
+      <text x="14" y="24" class="ink h" font-size="12">TAMBAYAN</text>
+      <circle cx="150" cy="20" r="7" fill="#33404a"/>
+      <circle cx="172" cy="20" r="7" fill="#33404a"/>
+      <circle cx="194" cy="20" r="7" fill="#3fbf7f"/>
+      <circle cx="216" cy="20" r="7" fill="#33404a"/>
+      <text x="14" y="44" class="lbl">LEADERBOARDS · DOTA 2</text>
+      <line x1="0" y1="52" x2="244" y2="52" class="line"/>
+      <text x="14" y="76" class="title">Leaderboards</text>
+      <!-- toggles -->
+      <rect x="14" y="86" width="104" height="22" rx="6" fill="#1e232b" stroke="#3fbf7f"/>
+      <text x="66" y="101" text-anchor="middle" class="ink" font-size="10">Teams</text>
+      <rect x="122" y="86" width="104" height="22" rx="6" class="s1" stroke="#333a45"/>
+      <text x="174" y="101" text-anchor="middle" class="mute" font-size="10">Players</text>
+      <rect x="14" y="116" width="80" height="18" rx="9" class="s2" stroke="#333a45"/>
+      <text x="24" y="129" class="cap" font-size="9">Region ▾</text>
+      <rect x="100" y="116" width="80" height="18" rx="9" class="s2" stroke="#333a45"/>
+      <text x="110" y="129" class="cap" font-size="9">School ▾</text>
+      <!-- rows -->
+      <g transform="translate(14,144)" font-size="10">
+        <g>
+          <rect width="216" height="30" rx="6" class="s1" stroke="#333a45"/>
+          <rect width="3" height="30" fill="#3fbf7f"/>
+          <text x="14" y="19" class="dim num">1</text>
+          <text x="34" y="19" class="ink">UP Cebu Warriors</text>
+          <text x="202" y="19" text-anchor="end" class="ink num h">1930</text>
+        </g>
+        <g transform="translate(0,36)">
+          <rect width="216" height="30" rx="6" class="s1" stroke="#333a45"/>
+          <text x="14" y="19" class="dim num">2</text>
+          <text x="34" y="19" class="ink">USTP Cyclones</text>
+          <text x="202" y="19" text-anchor="end" class="ink num h">1706</text>
+        </g>
+        <g transform="translate(0,72)">
+          <rect width="216" height="30" rx="6" class="s1" stroke="#333a45"/>
+          <text x="14" y="19" class="dim num">3</text>
+          <text x="34" y="19" class="ink">Silliman Stallions</text>
+          <text x="202" y="19" text-anchor="end" class="ink num h">1497</text>
+        </g>
+        <g transform="translate(0,108)" opacity="0.7">
+          <rect width="216" height="30" rx="6" class="s1" stroke="#333a45"/>
+          <text x="14" y="19" class="dim num">4</text>
+          <text x="34" y="19" class="dim">NU Bulldogs Dota</text>
+          <text x="202" y="19" text-anchor="end" class="dim num">1442</text>
+        </g>
+      </g>
+      <text x="14" y="312" class="mute" font-size="9">Sort: Competitive rating ⇄ Community standing</text>
+    </g>
+    <text x="122" y="524" text-anchor="middle" class="mute" font-size="10">3 · Leaderboards</text>
+  </g>
+
+  <!-- FRAME 4 · MATCH ROOM (CoDM active) -->
+  <g transform="translate(827,44)">
+    <rect x="-6" y="-6" width="256" height="510" rx="20" class="s1" stroke="#333a45"/>
+    <g clip-path="url(#scr)">
+      <rect width="244" height="486" class="paper"/>
+      <rect width="244" height="52" class="s1"/>
+      <text x="14" y="24" class="ink h" font-size="12">TAMBAYAN</text>
+      <circle cx="150" cy="20" r="7" fill="#33404a"/>
+      <circle cx="172" cy="20" r="7" fill="#33404a"/>
+      <circle cx="194" cy="20" r="7" fill="#33404a"/>
+      <circle cx="216" cy="20" r="7" fill="#e0a437"/>
+      <text x="14" y="44" class="lbl">MATCH ROOM · CODM</text>
+      <line x1="0" y1="52" x2="244" y2="52" class="line"/>
+      <text x="14" y="76" class="title">Match Room</text>
+      <!-- VS -->
+      <g transform="translate(14,88)">
+        <rect width="216" height="52" rx="10" class="s1" stroke="#333a45"/>
+        <text x="14" y="24" class="ink h" font-size="10">BatState Red Spartans</text>
+        <text x="14" y="40" class="mute num" font-size="9">RATING 2071</text>
+        <text x="202" y="24" text-anchor="end" class="ink h" font-size="10">FEU Tamaraws</text>
+        <text x="202" y="40" text-anchor="end" class="mute num" font-size="9">1638</text>
+        <text x="108" y="33" text-anchor="middle" fill="#e0a437" class="h" font-size="11">VS</text>
+      </g>
+      <!-- ruleset -->
+      <g transform="translate(14,150)">
+        <text y="10" class="lbl">RULESET · LOCKED</text>
+        <rect y="16" width="216" height="70" rx="10" class="s1" stroke="#333a45"/>
+        <text x="12" y="34" class="dim" font-size="9">Mode  Ranked MP</text>
+        <text x="12" y="50" class="dim" font-size="9">Maps  Standoff, Summit, Raid</text>
+        <text x="12" y="66" class="dim" font-size="9">Series  BO5      Server  PH</text>
+      </g>
+      <!-- countdown -->
+      <g transform="translate(14,246)">
+        <rect width="216" height="40" rx="10" class="s2" stroke="#e0a437"/>
+        <text x="108" y="18" text-anchor="middle" class="lbl">STARTS IN</text>
+        <text x="108" y="34" text-anchor="middle" fill="#e0a437" class="num h" font-size="14">12:04</text>
+      </g>
+      <!-- result -->
+      <g transform="translate(14,300)">
+        <text y="10" class="lbl">REPORT RESULT · DUAL CONFIRM</text>
+        <rect y="16" width="100" height="28" rx="6" class="s1" stroke="#333a45"/>
+        <text x="50" y="34" text-anchor="middle" class="ink num" font-size="11">3</text>
+        <rect x="116" y="16" width="100" height="28" rx="6" class="s1" stroke="#333a45"/>
+        <text x="166" y="34" text-anchor="middle" class="ink num" font-size="11">2</text>
+        <rect y="52" width="216" height="18" rx="9" fill="#9aa4b2"/>
+        <text x="108" y="65" text-anchor="middle" fill="#0d1015" font-size="8" class="h">SUBMIT · WAITING ON FEU</text>
+        <text y="86" class="mute" font-size="8">Both confirm → Elo updates both ratings</text>
+      </g>
+    </g>
+    <text x="122" y="524" text-anchor="middle" class="mute" font-size="10">4 · Match Room</text>
+  </g>
+
+  <!-- FRAME 5 · MEETUPS & EVENTS (MLBB active) -->
+  <g transform="translate(1096,44)">
+    <rect x="-6" y="-6" width="256" height="510" rx="20" class="s1" stroke="#333a45"/>
+    <g clip-path="url(#scr)">
+      <rect width="244" height="486" class="paper"/>
+      <rect width="244" height="52" class="s1"/>
+      <text x="14" y="24" class="ink h" font-size="12">TAMBAYAN</text>
+      <circle cx="150" cy="20" r="7" fill="#2bb3e0"/>
+      <circle cx="172" cy="20" r="7" fill="#33404a"/>
+      <circle cx="194" cy="20" r="7" fill="#33404a"/>
+      <circle cx="216" cy="20" r="7" fill="#33404a"/>
+      <text x="14" y="44" class="lbl">MEETUPS &amp; EVENTS · MLBB</text>
+      <line x1="0" y1="52" x2="244" y2="52" class="line"/>
+      <text x="14" y="76" class="title">Meetups &amp; Events</text>
+      <text x="14" y="92" class="cap" font-size="10">Same weight as the scrim feed</text>
+      <g transform="translate(14,102)">
+        <rect width="216" height="92" rx="10" class="s1" stroke="#333a45"/>
+        <rect width="3" height="92" fill="#2bb3e0"/>
+        <text x="14" y="22" class="ink h" font-size="10">Katipunan Campus LAN</text>
+        <text x="14" y="38" class="mute" font-size="9">ADMU Esports Society · in 4 days</text>
+        <text x="14" y="54" class="mute" font-size="9">Blue Eagle Gym · cap 64</text>
+        <rect x="14" y="62" width="70" height="18" rx="9" fill="#2bb3e0"/>
+        <text x="49" y="75" text-anchor="middle" fill="#0d1015" font-size="8" class="h">RSVP</text>
+        <rect x="92" y="62" width="86" height="18" rx="9" class="s2" stroke="#333a45"/>
+        <text x="135" y="75" text-anchor="middle" class="dim" font-size="8">QR CHECK-IN</text>
+      </g>
+      <g transform="translate(14,204)">
+        <rect width="216" height="92" rx="10" class="s1" stroke="#333a45"/>
+        <rect width="3" height="92" fill="#2bb3e0"/>
+        <text x="14" y="22" class="ink h" font-size="10">Hybrid Finals — Season 0</text>
+        <text x="14" y="38" class="mute" font-size="9">Online ladder → onsite · UP Cebu</text>
+        <text x="14" y="54" class="mute" font-size="9">in 30 days · spectators welcome</text>
+        <rect x="14" y="62" width="70" height="18" rx="9" fill="#2bb3e0"/>
+        <text x="49" y="75" text-anchor="middle" fill="#0d1015" font-size="8" class="h">RSVP</text>
+        <rect x="92" y="62" width="70" height="18" rx="9" class="s2" stroke="#333a45"/>
+        <text x="127" y="75" text-anchor="middle" class="dim" font-size="8">GOING 41</text>
+      </g>
+      <g transform="translate(14,306)">
+        <text y="10" class="lbl">ANNOUNCEMENTS</text>
+        <rect y="16" width="216" height="44" rx="10" class="s1" stroke="#333a45"/>
+        <text x="12" y="34" class="dim" font-size="9">MLBB rank window updated</text>
+        <text x="12" y="50" class="mute" font-size="8">Re-submit if your badge looks stale</text>
+        <text y="82" class="mute" font-size="8">Exam-week status pauses listings — no penalty</text>
+      </g>
+    </g>
+    <text x="122" y="524" text-anchor="middle" class="mute" font-size="10">5 · Meetups &amp; Events</text>
+  </g>
+
+  <text x="20" y="596" class="mute" font-size="10">Game switcher (4 hue dots) persists in every header · one hue per title: MLBB cyan · Valorant red · Dota 2 green · CoDM amber</text>
+  <text x="20" y="614" class="mute" font-size="10">Two axes shown throughout: competitive rating (Elo, from confirmed scrims) and community standing (from attending / hosting physical events)</text>
+</svg>

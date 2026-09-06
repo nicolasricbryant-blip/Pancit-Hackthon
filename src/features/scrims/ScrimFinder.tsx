@@ -1,33 +1,33 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { getGame, type GameId } from "@/features/games/config";
-import { SCRIM_LISTINGS } from "./seed";
 import { FilterBar, EMPTY_FILTERS, type FilterState } from "./FilterBar";
 import { ScrimCard } from "./ScrimCard";
-import { SkeletonCard } from "./SkeletonCard";
+import type { ScrimListing } from "./types";
 
 /**
  * Scrim Finder — the product. Dense, functional feed of available teams in the
  * selected game, narrowed by three structured filters. Header game selection is
  * passed in as `game`; the filter bar narrows further.
  *
- * Mounted with `key={game}` by the page, so a game change remounts this with
- * fresh filter state and a fresh loading pass — no game-dependent effect needed.
+ * Listings are fetched live on the server and handed down as `listings`. Mounted
+ * with `key={game}` by the page, so a game change remounts this with fresh
+ * filter state and a fresh set of listings.
  */
-export function ScrimFinder({ game }: { game: GameId }) {
+export function ScrimFinder({
+  game,
+  listings,
+}: {
+  game: GameId;
+  listings: ScrimListing[];
+}) {
   const config = getGame(game);
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
-  const [loading, setLoading] = useState(true);
-
-  // Brief skeleton on mount, then reveal the feed.
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 650);
-    return () => clearTimeout(t);
-  }, []);
 
   const results = useMemo(() => {
-    return SCRIM_LISTINGS.filter((l) => l.game === game)
+    return listings
+      .filter((l) => l.game === game)
       .filter((l) => !filters.rankBand || l.rankTiers.includes(filters.rankBand))
       .filter(
         (l) =>
@@ -36,7 +36,7 @@ export function ScrimFinder({ game }: { game: GameId }) {
           l.timeWindow === filters.timeWindow,
       )
       .filter((l) => !filters.format || l.format === filters.format);
-  }, [game, filters]);
+  }, [listings, game, filters]);
 
   const patch = (p: Partial<FilterState>) =>
     setFilters((f) => ({ ...f, ...p }));
@@ -51,16 +51,12 @@ export function ScrimFinder({ game }: { game: GameId }) {
         onClear={clear}
       />
 
-      {!loading && (
-        <p className="result-count">
-          {results.length} {results.length === 1 ? "team" : "teams"} available
-        </p>
-      )}
+      <p className="result-count">
+        {results.length} {results.length === 1 ? "team" : "teams"} available
+      </p>
 
       <div className="feed-grid">
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : results.length === 0 ? (
+        {results.length === 0 ? (
           <div className="empty-state">
             <p>No scrims match — widen your filters.</p>
             <button type="button" className="reset-btn" onClick={clear}>

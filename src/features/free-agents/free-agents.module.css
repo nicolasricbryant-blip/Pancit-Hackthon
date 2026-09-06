@@ -1,0 +1,344 @@
+/* ============================================================================
+   FREE-AGENT BOARD — card internals. Board layout, filter bar, grid, chips and
+   empty state all reuse the global classes in globals.css.
+   ========================================================================== */
+
+.headRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.newBtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-accent-ink);
+  background: var(--game-current);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-md);
+  text-decoration: none;
+  transition: filter var(--dur-fast) var(--ease-out);
+}
+.newBtn:hover {
+  filter: brightness(1.08);
+}
+.newBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --- card ------------------------------------------------------------------ */
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.handle {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.name {
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+}
+
+.pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+  background: var(--game-current-dim);
+  color: var(--color-ink);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.rank {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+.rankTag {
+  color: var(--color-ink-mute);
+  margin-right: var(--space-2xs);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+}
+
+.blurb {
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.footRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-top: auto;
+}
+.time {
+  color: var(--color-ink-mute);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+.closeBtn {
+  appearance: none;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-ink-dim);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.closeBtn:hover {
+  color: var(--color-ink);
+  border-color: var(--color-danger);
+}
+.closeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.closeErr {
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+
+/* ============================================================================
+   CREATE-LISTING FORM
+   ========================================================================== */
+.formWrap {
+  max-width: 620px;
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--game-current);
+  border-radius: var(--radius-lg);
+}
+.sectionTitle {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--text-lg);
+  margin: 0;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+.input,
+.select,
+.textarea {
+  appearance: none;
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: var(--color-ink-mute);
+}
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.hint {
+  color: var(--color-ink-dim);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+.count {
+  align-self: flex-end;
+  color: var(--color-ink-mute);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+}
+
+.radioRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.radio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.radio[data-on="true"] {
+  border-color: var(--game-current);
+  background: var(--game-current-dim);
+}
+.radioText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.radioName {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+.radioDesc {
+  color: var(--color-ink-dim);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-xs);
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.check[data-on="true"] {
+  border-color: var(--game-current);
+  background: var(--game-current-dim);
+}
+
+.formError {
+  font-size: var(--text-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  background: var(--game-current-dim);
+  border: 1px solid var(--color-danger);
+}
+.fieldError {
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+.submit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-accent-ink);
+  background: var(--game-current);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.submit:hover {
+  filter: brightness(1.08);
+}
+.submit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.submit:active {
+  transform: translateY(1px);
+}
+.submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+.cancelLink {
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+.cancelLink:hover {
+  color: var(--color-ink);
+}

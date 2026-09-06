@@ -10,6 +10,18 @@ export interface CreateEventState {
   error: string | null;
 }
 
+/**
+ * A `datetime-local` input is a bare wall-clock string (`2026-09-10T19:30`) with
+ * no zone. The server (Vercel) runs in UTC, so `new Date(local)` would read it as
+ * UTC and shift every event 8 hours. Events are always entered in PH time, and
+ * the Philippines is a fixed UTC+8 with no DST — so pin the offset explicitly.
+ */
+function manilaLocalToIso(local: string): string {
+  // "YYYY-MM-DDTHH:mm" (16 chars) → add seconds; then pin +08:00.
+  const withSecs = local.length === 16 ? `${local}:00` : local;
+  return new Date(`${withSecs}+08:00`).toISOString();
+}
+
 /** `"EVT-" + 6 random A–Z0–9`. */
 function genCheckinCode(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -78,8 +90,8 @@ export async function createEvent(
       school_id: isPhysical && schoolId ? schoolId : null,
       region: isPhysical ? region : null,
       venue: isPhysical ? venue : null,
-      starts_at: new Date(startsAt).toISOString(),
-      ends_at: endsAt ? new Date(endsAt).toISOString() : null,
+      starts_at: manilaLocalToIso(startsAt),
+      ends_at: endsAt ? manilaLocalToIso(endsAt) : null,
       capacity,
       description: description || null,
       checkin_code: genCheckinCode(),

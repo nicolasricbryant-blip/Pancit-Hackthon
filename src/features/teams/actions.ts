@@ -146,6 +146,15 @@ export async function updateTeam(input: UpdateTeamInput): Promise<ActionResult> 
   if (region.length < 2) return { ok: false, error: "Region is required." };
 
   const supabase = await createClient();
+
+  // Detect a game switch so the team's rating row moves with it — otherwise the
+  // rating stays stranded under the old game and the leaderboards disagree.
+  const { data: before } = await supabase
+    .from("teams")
+    .select("game_id")
+    .eq("id", input.teamId)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("teams")
     .update({
@@ -159,6 +168,31 @@ export async function updateTeam(input: UpdateTeamInput): Promise<ActionResult> 
     .eq("id", input.teamId);
 
   if (error) return { ok: false, error: error.message };
+
+  if (before && before.game_id !== input.gameId) {
+    // Move the rating row to the new game. If one already exists there, drop the
+    // stale one instead of colliding on the (game_id, team_id) unique index.
+    const { data: existing } = await supabase
+      .from("ratings")
+      .select("id")
+      .eq("team_id", input.teamId)
+      .eq("game_id", input.gameId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from("ratings")
+        .delete()
+        .eq("team_id", input.teamId)
+        .eq("game_id", before.game_id);
+    } else {
+      await supabase
+        .from("ratings")
+        .update({ game_id: input.gameId })
+        .eq("team_id", input.teamId)
+        .eq("game_id", before.game_id);
+    }
+  }
 
   revalidatePath(`/teams/${input.teamId}`);
   revalidatePath(`/teams/${input.teamId}/manage`);

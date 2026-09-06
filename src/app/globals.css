@@ -10,6 +10,9 @@ html,
 body {
   /* clip, never hidden — keeps position:sticky working */
   overflow-x: clip;
+  /* Native-app feel: no pinch-zoom, no double-tap zoom. iOS Safari ignores the
+     viewport `user-scalable=no`, but honours `touch-action` on the root. */
+  touch-action: pan-x pan-y;
 }
 
 html {
@@ -24,6 +27,29 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* kill the grey tap flash + iOS pull-to-refresh / overscroll glow */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Interactive elements: `manipulation` drops the legacy 300ms double-tap-zoom
+   delay without disabling panning. */
+a,
+button,
+label,
+select,
+summary,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+}
+
+/* Long-press callout / text selection is off for chrome, kept for real copy. */
+.app-header-wrap,
+.app-nav,
+.game-switcher {
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 /* Every numeric UI value uses tabular figures. */

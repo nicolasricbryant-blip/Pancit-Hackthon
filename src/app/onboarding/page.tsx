@@ -18,8 +18,9 @@ export default async function OnboardingPage({
   if (!user) redirect("/sign-in?next=/onboarding");
 
   const profile = await getCurrentProfile();
-  // Already onboarded (school picked) → nothing to do here.
-  if (profile?.school_id) redirect("/");
+  // Already finished setup → nothing to do here. (Keyed on `onboarded`, not
+  // school_id: school is optional, so school_id can be null on a done profile.)
+  if (profile?.onboarded) redirect("/");
 
   const sp = await searchParams;
   const roleRaw = Array.isArray(sp.role) ? sp.role[0] : sp.role;

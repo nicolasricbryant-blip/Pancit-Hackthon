@@ -69,6 +69,8 @@ export function OnboardingForm({
   const [schoolQuery, setSchoolQuery] = useState("");
   const [schoolOpen, setSchoolOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [noSchool, setNoSchool] = useState(false);
+  const [schoolOther, setSchoolOther] = useState("");
   const [region, setRegion] = useState(matchedSchool?.region ?? "");
 
   const [submitting, setSubmitting] = useState(false);
@@ -157,20 +159,19 @@ export function OnboardingForm({
 
   const handleError = touched && (handleState === "invalid" || handleState === "taken");
   const nameError = touched && displayName.trim().length < 2;
-  const schoolError = touched && !schoolId;
-  const regionError = touched && region.trim().length === 0;
 
   async function onSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     setTouched(true);
     setFormError(null);
 
+    // Only handle + display name are required. School and region are optional so
+    // a tester without an .edu.ph address (or whose school isn't seeded yet) can
+    // still finish setup.
     if (
       !HANDLE_RE.test(handle) ||
       handleState === "taken" ||
-      displayName.trim().length < 2 ||
-      !schoolId ||
-      region.trim().length === 0
+      displayName.trim().length < 2
     ) {
       return;
     }
@@ -192,9 +193,11 @@ export function OnboardingForm({
         handle,
         display_name: displayName.trim(),
         roles: rolesFromChoice(role),
-        school_id: schoolId,
-        region: region.trim(),
-        school_verified: schoolVerified,
+        school_id: noSchool ? null : schoolId,
+        school_other: noSchool ? schoolOther.trim() || null : null,
+        region: region.trim() || null,
+        school_verified: !noSchool && schoolVerified,
+        onboarded: true,
       })
       .eq("id", user.id);
 
@@ -313,10 +316,34 @@ export function OnboardingForm({
       {/* school combobox */}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="onb-school">
-          School
+          School <span className={styles.optional}>· optional</span>
         </label>
 
-        {selectedSchool ? (
+        {noSchool ? (
+          <>
+            <input
+              id="onb-school"
+              className={styles.input}
+              type="text"
+              autoComplete="organization"
+              placeholder="Type your school's name"
+              value={schoolOther}
+              onChange={(e) => setSchoolOther(e.target.value)}
+              disabled={submitting}
+            />
+            <button
+              type="button"
+              className={styles.linkBtn}
+              onClick={() => {
+                setNoSchool(false);
+                setSchoolOther("");
+              }}
+              disabled={submitting}
+            >
+              Pick from the list instead
+            </button>
+          </>
+        ) : selectedSchool ? (
           <div className={styles.selectedSchool}>
             <span>
               {selectedSchool.name}
@@ -368,7 +395,6 @@ export function OnboardingForm({
                   setSchoolOpen(false);
                 }
               }}
-              aria-invalid={schoolError}
               disabled={submitting}
             />
             {schoolOpen && (
@@ -398,15 +424,26 @@ export function OnboardingForm({
             )}
           </div>
         )}
-        {schoolError && (
-          <span className={styles.fieldError}>Pick your school.</span>
+        {!noSchool && !selectedSchool && (
+          <button
+            type="button"
+            className={styles.linkBtn}
+            onClick={() => {
+              setNoSchool(true);
+              setSchoolId(null);
+              setSchoolQuery("");
+            }}
+            disabled={submitting}
+          >
+            My school isn&apos;t listed
+          </button>
         )}
       </div>
 
       {/* region */}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="onb-region">
-          Region
+          Region <span className={styles.optional}>· optional</span>
         </label>
         <input
           id="onb-region"
@@ -415,20 +452,11 @@ export function OnboardingForm({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           placeholder="e.g. NCR"
-          aria-invalid={regionError}
-          aria-describedby={regionError ? "onb-region-err" : undefined}
           disabled={submitting}
-          required
         />
-        {regionError ? (
-          <span id="onb-region-err" className={styles.fieldError}>
-            Region is required.
-          </span>
-        ) : (
-          <span className={styles.hint}>
-            Prefilled from your school — edit if you compete elsewhere.
-          </span>
-        )}
+        <span className={styles.hint}>
+          Prefilled from your school when we know it — edit if you compete elsewhere.
+        </span>
       </div>
 
       <button

@@ -1,5 +1,6 @@
 import { coerceGameId, getGame } from "@/features/games/config";
 import { ScrimFinder } from "@/features/scrims/ScrimFinder";
+import { listScrimsForGame } from "@/features/scrims/queries";
 
 type ScopeVars = React.CSSProperties & {
   "--game-current"?: string;
@@ -10,6 +11,7 @@ export default async function Page(props: PageProps<"/">) {
   const searchParams = await props.searchParams;
   const game = coerceGameId(searchParams.game);
   const config = getGame(game);
+  const listings = await listScrimsForGame(game);
 
   // Wrapper hands the selected game's hue down to every card/button/chip.
   const scopeStyle: ScopeVars = {
@@ -25,7 +27,7 @@ export default async function Page(props: PageProps<"/">) {
           Teams available now in {config.label}. Filter by rank, time, and format —
           then request a scrim in one tap.
         </p>
-        <ScrimFinder key={game} game={game} />
+        <ScrimFinder key={game} game={game} listings={listings} />
       </div>
     </div>
   );
