@@ -6,7 +6,7 @@ PH collegiate esports scrim network. PWA. Next.js 16 (App Router, Turbopack) + R
 
 - **App (prod):** https://tambayan-red.vercel.app
 - **Repo:** https://github.com/nicolasricbryant-blip/Pancit-Hackthon (branch `master`)
-- **Vercel project:** `tambayan` (org nicolasricbryant-9459). GitHub-connected → auto-deploys on push. Env vars set (prod/preview/dev): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Vercel project:** `tambayan` (org nicolasricbryant-9459). GitHub push to `master` now builds a **Preview only** — production is NOT auto-followed. Promote with `vercel promote <preview-url> --yes` (or `vercel --prod`). Env vars set (prod/preview/dev): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - **Supabase:** project ref `didlozqquuszabfbznll`. GitHub-connected → `supabase/migrations/*` auto-apply on push (all idempotent + already recorded in `schema_migrations`). Auth `site_url` + allow-list point at the Vercel domain + localhost.
 
 ## What ships (done, deployed)
@@ -38,7 +38,10 @@ All 3 applied LIVE via Management API this session (also auto-apply on push; ide
 
 Verify build: `npx tsc --noEmit && npm run lint && npm run build` — all green as of commit `be08b47`.
 
-## DONE this session (commit `be08b47`, NOT yet pushed)
+## DONE this session (commits `be08b47` + `66ca536`, PUSHED + DEPLOYED to prod)
+
+Prod deploy: `tambayan-598xb2rs7` (promoted via `vercel promote`). Live routes verified 200: `/ /brackets /brackets/[slug] /orgs /free-agents /leaderboards`; `/mentorship` → 307 sign-in. Live prod serves wave-3 DB (Elo ratings, 4-team bracket).
+
 
 1. ✅ Onboarding — `profiles.onboarded` flag; proxy trap keyed on it; school + region optional; "my school isn't listed" free-text path (`profiles.school_other`).
 2. ⚠️ Live auth E2E — still NOT run. Claude can't create accounts / enter passwords. Needs a human: signup (Gmail + `.edu.ph`) → onboarding → signin → check `profiles` row (onboarded, roles, school_id/school_other, school_verified).
@@ -52,11 +55,12 @@ Verify build: `npx tsc --noEmit && npm run lint && npm run build` — all green 
 
 ## NEXT
 
-- **Push `be08b47`** → triggers Vercel prod deploy + Supabase migration re-apply (idempotent, already live). Needs explicit go.
-- Live auth E2E (item 2) — human-run.
+- **Live auth E2E** (item 2) — human-run: signup (Gmail + `.edu.ph`) → onboarding → signin → check `profiles` row (onboarded, roles, school_id/school_other, school_verified).
+- **Rotate the Supabase PAT** (item 7) — `sbp_…` pasted in chat again this session; used for live migration apply + type gen. Dashboard → Account → Access Tokens. Put the next one in `.env.local`.
 - QA at 320px / 768px; nav strip is now 10 items (scrolls on mobile — check it feels ok).
 - Player leaderboard fills only after a bracket match is advanced (player ratings mirror team rating on `advance_bracket_match`).
-- `SkeletonCard.tsx` orphan cleanup; optional: `registerTeam` already guards `team.game_id === tournament.game_id`.
+- `src/features/scrims/SkeletonCard.tsx` orphan cleanup (no importers after the live-DB wire).
+- Vercel: consider re-enabling git auto-promote to production (Project → Settings → Git) so future `master` pushes deploy prod without a manual `vercel promote`.
 
 ## Build/run
 
