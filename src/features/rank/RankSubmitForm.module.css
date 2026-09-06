@@ -1,0 +1,227 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+}
+.sectionTitle {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+
+.input,
+.select {
+  appearance: none;
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.select {
+  background: var(--color-surface-1)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a8f99' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")
+    no-repeat right var(--space-sm) center;
+  padding-right: calc(var(--space-md) + 12px);
+  cursor: pointer;
+}
+.input:hover,
+.select:hover {
+  border-color: var(--color-ink-mute);
+}
+.input:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+.input:disabled,
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* hide number spinners — mono tabular reads cleaner */
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.input[type="number"] {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-ink-mute);
+}
+.previewValue {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-ink-dim);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+/* screenshot picker */
+.drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-md);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.drop:hover {
+  border-color: var(--color-ink-mute);
+}
+.drop:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.drop[data-has-file="true"] {
+  border-style: solid;
+  border-color: var(--game-current);
+}
+.drop[data-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.fileInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.fileInput:disabled {
+  cursor: not-allowed;
+}
+.dropTitle {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.dropHint {
+  font-size: var(--text-xs);
+  color: var(--color-ink-dim);
+}
+
+.fieldError {
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+.formError {
+  font-size: var(--text-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  background: var(--game-valorant-dim);
+  border: 1px solid var(--color-danger);
+}
+
+/* submit — 8 states: base / hover / focus-visible / active / disabled / loading / error / success */
+.submit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  color: var(--color-accent-ink);
+  background: var(--game-current);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  cursor: pointer;
+  transition:
+    filter var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.submit:hover {
+  filter: brightness(1.08);
+}
+.submit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.submit:active {
+  transform: translateY(1px);
+  filter: brightness(0.94);
+}
+.submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+.submit[data-loading="true"] {
+  color: transparent;
+  pointer-events: none;
+}
+.submit[data-loading="true"]::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid var(--color-accent-ink);
+  border-top-color: transparent;
+  animation: rank-submit-spin 0.7s linear infinite;
+}
+@keyframes rank-submit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.submit[data-error="true"] {
+  background: var(--color-danger);
+  color: var(--color-ink);
+}
+.submit[data-success="true"] {
+  background: var(--color-ok);
+  color: var(--color-accent-ink);
+}

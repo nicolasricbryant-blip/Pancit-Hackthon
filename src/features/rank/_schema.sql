@@ -1,0 +1,72 @@
+-- TAMBAYAN — rank submission + review board
+-- Schema deltas + optional seed. The architect applies this; the feature code
+-- cannot run migrations.
+-- Idempotent: safe to re-run.
+
+-- ---------------------------------------------------------------------------
+-- 1 · REQUIRED — admin write policy on game_profiles
+--
+-- migration 20260906010002_rls.sql only grants game_profiles writes to the
+-- owner (auth.uid() = profile_id). The review board's Approve / Reject must
+-- flip game_profiles.verification_status on *another* user's row, so admins
+-- need an explicit write policy. Without this, approve/reject update 0 rows
+-- and the player's status never changes (Postgres returns no error).
+-- ---------------------------------------------------------------------------
+drop policy if exists game_profiles_admin_write on public.game_profiles;
+create policy game_profiles_admin_write on public.game_profiles for all
+  using (public.is_admin()) with check (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- 2 · OPTIONAL — promote a user to admin so the review queue is reachable
+--     (email confirmation is ON and there is no local service key, so this is
+--      the only way to get an admin during the hackathon).
+-- ---------------------------------------------------------------------------
+-- update public.profiles
+--   set roles = array['player','admin']
+--   where handle = 'REPLACE_WITH_HANDLE';
+
+-- ---------------------------------------------------------------------------
+-- 3 · OPTIONAL — seed a couple of demo pending submissions.
+--     Requires >=1 real signed-up user. Replace the handle below; this seeds
+--     against that user's profile for mlbb + valorant.
+-- ---------------------------------------------------------------------------
+-- with u as (
+--   select id from public.profiles where handle = 'REPLACE_WITH_HANDLE'
+-- ),
+-- gp_mlbb as (
+--   insert into public.game_profiles
+--     (profile_id, game_id, claimed_rank, rank_label, verification_status)
+--   select u.id, 'mlbb',
+--          '{"tier":"Mythical Glory","stars":45,"points":180,"server":"5127"}'::jsonb,
+--          'Mythical Glory · 45 Stars · 180 Mythic Points', 'pending'
+--   from u
+--   on conflict (profile_id, game_id) do update
+--     set claimed_rank = excluded.claimed_rank,
+--         rank_label = excluded.rank_label,
+--         verification_status = 'pending'
+--   returning id, profile_id
+-- ),
+-- gp_val as (
+--   insert into public.game_profiles
+--     (profile_id, game_id, claimed_rank, rank_label, verification_status)
+--   select u.id, 'valorant',
+--          '{"tier":"Immortal","rr":120,"peak":"Immortal","region":"AP"}'::jsonb,
+--          'Immortal · 120 Rank Rating (RR)', 'pending'
+--   from u
+--   on conflict (profile_id, game_id) do update
+--     set claimed_rank = excluded.claimed_rank,
+--         rank_label = excluded.rank_label,
+--         verification_status = 'pending'
+--   returning id, profile_id
+-- )
+-- insert into public.rank_submissions
+--   (game_profile_id, profile_id, game_id, claimed_rank, screenshot_path, status)
+-- select gp_mlbb.id, gp_mlbb.profile_id, 'mlbb',
+--        '{"tier":"Mythical Glory","stars":45,"points":180,"server":"5127"}'::jsonb,
+--        null, 'pending'
+-- from gp_mlbb
+-- union all
+-- select gp_val.id, gp_val.profile_id, 'valorant',
+--        '{"tier":"Immortal","rr":120,"peak":"Immortal","region":"AP"}'::jsonb,
+--        null, 'pending'
+-- from gp_val;

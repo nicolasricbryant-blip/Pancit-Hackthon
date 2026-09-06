@@ -1,0 +1,147 @@
+.scope {
+  display: block;
+}
+
+.wrap {
+  max-width: 560px;
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.title {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.sub {
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  padding-left: calc(var(--space-lg) + 3px);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--game-current);
+  border-radius: var(--radius-lg);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.rankLine {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rankLabel {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.gameTag {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+
+.blurb {
+  margin: 0;
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.reason {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-sm);
+  background: var(--game-valorant-dim);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+}
+.reasonLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+  opacity: 0.8;
+}
+.reasonBody {
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    filter var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.cta[data-variant="primary"] {
+  color: var(--color-accent-ink);
+  background: var(--game-current);
+}
+.cta[data-variant="muted"] {
+  color: var(--color-ink);
+  background: var(--color-surface-3);
+  border-color: var(--color-line);
+}
+.cta:hover {
+  filter: brightness(1.08);
+}
+.cta:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.cta:active {
+  transform: translateY(1px);
+}
+
+.emptyHint {
+  margin: 0;
+  color: var(--color-ink-mute);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
