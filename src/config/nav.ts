@@ -18,6 +18,7 @@ export interface NavItem {
 export const ROUTES = {
   scrims: "/",
   leaderboards: "/leaderboards",
+  lobbies: "/lobbies",
   events: "/events",
   teams: "/teams",
   matches: "/matches",
@@ -37,6 +38,7 @@ export const ROUTES = {
 export const PRIMARY_NAV: NavItem[] = [
   { href: ROUTES.scrims, label: "Scrims", gameScoped: true },
   { href: ROUTES.leaderboards, label: "Leaderboards", gameScoped: true },
+  { href: ROUTES.lobbies, label: "Lobbies", gameScoped: true },
   { href: ROUTES.events, label: "Events", gameScoped: true },
   { href: ROUTES.teams, label: "Teams", gameScoped: true },
   { href: ROUTES.brackets, label: "Brackets", gameScoped: true },

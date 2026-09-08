@@ -426,3 +426,300 @@
   color: var(--color-ink);
   overflow-wrap: anywhere;
 }
+
+/* ── Main-role picker + auto-join (inside each game card) ─────────── */
+.gpDivider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.roleFieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.roleLegend {
+  padding: 0;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+.roleChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+.roleChip {
+  appearance: none;
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-sm);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-ink-mute);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.roleChip:hover {
+  color: var(--color-ink);
+}
+.roleChip:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.roleChip--on {
+  font-weight: 700;
+}
+
+.ctrlStatus {
+  margin: 0;
+  min-height: var(--space-md);
+}
+.savedTick {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-ok);
+}
+.ctrlErr {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.ajWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.ajRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+}
+.ajSwitch {
+  appearance: none;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 26px;
+  padding: 2px;
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.ajSwitch--on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.ajSwitchThumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--color-paper);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ajSwitch--on .ajSwitchThumb {
+  transform: translateX(18px);
+}
+.ajSwitch:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.ajSwitch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ajLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.ajHint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-ink-mute);
+}
+
+.ajSummaryRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-xs);
+}
+.ajSummary {
+  font-size: var(--text-xs);
+  color: var(--color-ink-dim);
+}
+.ajEdit {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 var(--space-2xs);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.ajEdit:hover {
+  color: var(--color-primary-hi);
+}
+.ajEdit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.ajSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+}
+.ajField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.ajFieldLabel {
+  padding: 0;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+.ajSelect {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-sm);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+}
+.ajSelect:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.ajModes {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.ajCheckRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.ajCheckRow input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+.ajActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.ajBtn {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary-ink);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.ajBtn:hover {
+  background: var(--color-primary-hi);
+  border-color: var(--color-primary-hi);
+}
+.ajBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.ajBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ajBtn--ghost {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-dim);
+  background: transparent;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.ajBtn--ghost:hover {
+  color: var(--color-ink);
+}
+.ajBtn--ghost:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.ajBtn--ghost:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ajNote {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-ink-dim);
+  line-height: 1.5;
+}
+.ajNote:empty {
+  display: none;
+}
+.ajNoteLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.ajNoteLink:hover {
+  color: var(--color-primary-hi);
+}

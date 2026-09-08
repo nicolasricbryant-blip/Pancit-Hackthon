@@ -59,11 +59,20 @@ export default async function ProfilePage() {
 
   const { data: gpRows } = await supabase
     .from("game_profiles")
-    .select("game_id, rank_label, verification_status")
+    .select("game_id, rank_label, verification_status, main_roles")
     .eq("profile_id", profile.id);
 
   const gpByGame = new Map(
     (gpRows ?? []).map((r) => [r.game_id, r] as const),
+  );
+
+  const { data: prefRows } = await supabase
+    .from("lobby_autojoin_prefs")
+    .select("game_id, enabled, rank_min, rank_max, modes, mic_ok")
+    .eq("profile_id", profile.id);
+
+  const prefsByGame = new Map(
+    (prefRows ?? []).map((r) => [r.game_id, r] as const),
   );
 
   let schoolName: string | null = null;
@@ -91,7 +100,14 @@ export default async function ProfilePage() {
   const gamePanel = (
     <div className={styles.gameList}>
       {GAMES.map((g) => (
-        <GameProfileCard key={g.id} game={g} gp={gpByGame.get(g.id) ?? null} />
+        <GameProfileCard
+          key={g.id}
+          game={g}
+          gp={gpByGame.get(g.id) ?? null}
+          userId={user.id}
+          mainRoles={gpByGame.get(g.id)?.main_roles ?? []}
+          autojoin={prefsByGame.get(g.id) ?? null}
+        />
       ))}
     </div>
   );

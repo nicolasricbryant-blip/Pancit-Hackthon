@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { GameConfig } from "@/features/games/config";
 import styles from "@/app/profile/profile.module.css";
+import { MainRolePicker } from "./MainRolePicker";
+import { AutoJoinControl, type AutoJoinPref } from "./AutoJoinControl";
 
 interface Gp {
   rank_label: string | null;
@@ -17,9 +19,15 @@ const BADGE: Record<string, { label: string; cls: string }> = {
 export function GameProfileCard({
   game,
   gp,
+  userId,
+  mainRoles,
+  autojoin,
 }: {
   game: GameConfig;
   gp: Gp | null;
+  userId: string;
+  mainRoles: string[];
+  autojoin: AutoJoinPref | null;
 }) {
   const status = gp?.verification_status ?? "unverified";
   const badge = BADGE[status];
@@ -63,6 +71,16 @@ export function GameProfileCard({
             Verify rank
           </Link>
         )}
+      </div>
+
+      <div className={styles.gpDivider}>
+        <MainRolePicker game={game} initial={mainRoles} userId={userId} />
+        <AutoJoinControl
+          game={game}
+          initialPref={autojoin}
+          hasRole={mainRoles.length > 0}
+          userId={userId}
+        />
       </div>
     </article>
   );

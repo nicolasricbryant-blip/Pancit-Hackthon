@@ -13,6 +13,12 @@ export interface GameConfig {
   hueToken: string;
   /** Rank bands for this title, ordered low → high. Drives the Rank Band filter. */
   rankTiers: string[];
+  /**
+   * In-game roles / positions for this title. Players set their main role(s) per
+   * game; lobbies declare which roles they still need. "Flex" is a catch-all that
+   * matches any needed role in the auto-join matchmaker. Ordered for display.
+   */
+  roles: string[];
 }
 
 export const GAMES: GameConfig[] = [
@@ -21,24 +27,28 @@ export const GAMES: GameConfig[] = [
     label: "MLBB",
     hueToken: "--game-mlbb",
     rankTiers: ["Mythic", "Mythical Glory", "Mythical Honor", "Mythical Immortal"],
+    roles: ["Gold Lane", "EXP Lane", "Mid Lane", "Roam", "Jungle", "Flex"],
   },
   {
     id: "valorant",
     label: "Valorant",
     hueToken: "--game-valorant",
     rankTiers: ["Diamond", "Ascendant", "Immortal", "Radiant"],
+    roles: ["Duelist", "Controller", "Sentinel", "Initiator", "Flex"],
   },
   {
     id: "dota",
     label: "Dota 2",
     hueToken: "--game-dota",
     rankTiers: ["3k MMR", "4k MMR", "5k MMR", "6k+ MMR"],
+    roles: ["Carry (1)", "Mid (2)", "Offlane (3)", "Soft Support (4)", "Hard Support (5)", "Flex"],
   },
   {
     id: "codm",
     label: "CoDM",
     hueToken: "--game-codm",
     rankTiers: ["Pro", "Master", "Grand Master", "Legendary"],
+    roles: ["Slayer", "Objective", "Anchor", "Support", "Flex"],
   },
 ];
 

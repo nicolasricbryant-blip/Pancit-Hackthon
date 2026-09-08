@@ -385,6 +385,7 @@ export type Database = {
           created_at: string
           game_id: string
           id: string
+          main_roles: string[]
           profile_id: string
           rank_label: string | null
           updated_at: string
@@ -395,6 +396,7 @@ export type Database = {
           created_at?: string
           game_id: string
           id?: string
+          main_roles?: string[]
           profile_id: string
           rank_label?: string | null
           updated_at?: string
@@ -405,6 +407,7 @@ export type Database = {
           created_at?: string
           game_id?: string
           id?: string
+          main_roles?: string[]
           profile_id?: string
           rank_label?: string | null
           updated_at?: string
@@ -459,6 +462,171 @@ export type Database = {
           sort_order?: number
         }
         Relationships: []
+      }
+      lobbies: {
+        Row: {
+          auto_fill: boolean
+          created_at: string
+          expires_at: string
+          game_id: string
+          host_id: string
+          id: string
+          mic_required: boolean
+          mode: string
+          needed_roles: string[]
+          rank_max: string | null
+          rank_min: string | null
+          slots_total: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          auto_fill?: boolean
+          created_at?: string
+          expires_at?: string
+          game_id: string
+          host_id: string
+          id?: string
+          mic_required?: boolean
+          mode?: string
+          needed_roles?: string[]
+          rank_max?: string | null
+          rank_min?: string | null
+          slots_total?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          auto_fill?: boolean
+          created_at?: string
+          expires_at?: string
+          game_id?: string
+          host_id?: string
+          id?: string
+          mic_required?: boolean
+          mode?: string
+          needed_roles?: string[]
+          rank_max?: string | null
+          rank_min?: string | null
+          slots_total?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lobbies_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lobbies_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lobby_autojoin_prefs: {
+        Row: {
+          enabled: boolean
+          game_id: string
+          mic_ok: boolean
+          modes: string[]
+          profile_id: string
+          rank_max: string | null
+          rank_min: string | null
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          game_id: string
+          mic_ok?: boolean
+          modes?: string[]
+          profile_id: string
+          rank_max?: string | null
+          rank_min?: string | null
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          game_id?: string
+          mic_ok?: boolean
+          modes?: string[]
+          profile_id?: string
+          rank_max?: string | null
+          rank_min?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lobby_autojoin_prefs_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lobby_autojoin_prefs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lobby_members: {
+        Row: {
+          created_at: string
+          id: string
+          joined_via: string
+          lobby_id: string
+          profile_id: string
+          ready_by: string | null
+          role: string | null
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_via?: string
+          lobby_id: string
+          profile_id: string
+          ready_by?: string | null
+          role?: string | null
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_via?: string
+          lobby_id?: string
+          profile_id?: string
+          ready_by?: string | null
+          role?: string | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lobby_members_lobby_id_fkey"
+            columns: ["lobby_id"]
+            isOneToOne: false
+            referencedRelation: "lobbies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lobby_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mentorship_requests: {
         Row: {
@@ -1370,11 +1538,22 @@ export type Database = {
         Args: { p_match: string; p_score_a: number; p_score_b: number }
         Returns: undefined
       }
+      enable_autojoin: {
+        Args: {
+          p_game: string
+          p_mic_ok: boolean
+          p_modes: string[]
+          p_rank_max: string
+          p_rank_min: string
+        }
+        Returns: number
+      }
       ensure_team_rating: {
         Args: { p_game: string; p_team: string }
         Returns: undefined
       }
       ensure_team_reliability: { Args: { p_team: string }; Returns: undefined }
+      expire_stale_lobbies: { Args: never; Returns: undefined }
       generate_bracket: { Args: { p_tournament: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       is_org_admin: { Args: { p_org_id: string }; Returns: boolean }
@@ -1398,10 +1577,16 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      lobby_accept_match: { Args: { p_lobby: string }; Returns: undefined }
+      lobby_rank_ok: {
+        Args: { p_game: string; p_max: string; p_min: string; p_rank: string }
+        Returns: boolean
+      }
       report_no_show: {
         Args: { p_match: string; p_offender: string }
         Returns: undefined
       }
+      run_lobby_matchmaker: { Args: { p_lobby: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
