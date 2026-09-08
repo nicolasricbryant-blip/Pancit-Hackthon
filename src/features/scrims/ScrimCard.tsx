@@ -1,5 +1,6 @@
 import type { ScrimListing } from "./types";
 import { RequestScrimButton } from "./RequestScrimButton";
+import { TeamCrest } from "./TeamCrest";
 
 function VerifiedBadge() {
   return (
@@ -29,34 +30,39 @@ function VerifiedBadge() {
 }
 
 export function ScrimCard({ listing }: { listing: ScrimListing }) {
+  const tonight = listing.timeWindow === "Tonight";
+  const pillTone = tonight ? "now" : "soon";
+  const pillText = tonight ? "TONIGHT" : listing.timeWindow.toUpperCase();
+
   return (
     <article className="scrim-card">
       <div className="card-head">
-        <div className="card-team">
-          <span>{listing.teamName}</span>
-          {listing.verified && <VerifiedBadge />}
+        <TeamCrest name={listing.teamName} />
+        <div className="card-id">
+          <div className="card-team">
+            <span>{listing.teamName}</span>
+            {listing.verified && <VerifiedBadge />}
+          </div>
+          <div className="card-school">{listing.school}</div>
         </div>
-        <div className="card-school">{listing.school}</div>
+        <span className={`pill pill--${pillTone}`}>{pillText}</span>
       </div>
 
-      <div className="stat-row">
-        <span>
-          <span className="label">RATING</span>
-          {listing.rating}
-        </span>
-        <span>
-          <span className="label">RELIABILITY</span>
-          {listing.reliability}%
-        </span>
-        <span className="hue-dot" aria-hidden />
+      <div className="stat-tiles">
+        <div className="stat-tile">
+          <span className="stat-tile-label">Rating</span>
+          <span className="stat-tile-value">{listing.rating}</span>
+        </div>
+        <div className="stat-tile">
+          <span className="stat-tile-label">Reliability</span>
+          <span className="stat-tile-value">{listing.reliability}%</span>
+        </div>
       </div>
 
-      <div className="meta-row">
-        <span>{listing.availability}</span>
-        <span className="sep">·</span>
-        <span>{listing.format}</span>
-        <span className="sep">·</span>
-        <span>{listing.rankBand}</span>
+      <div className="meta-chips">
+        <span className="meta-chip">{listing.format}</span>
+        <span className="meta-chip">{listing.rankBand}</span>
+        <span className="meta-chip meta-chip--wide">{listing.availability}</span>
       </div>
 
       <div className="card-action">

@@ -6,13 +6,13 @@ import { GAMES, coerceGameId, type GameId } from "@/features/games/config";
 
 type HueVars = React.CSSProperties & {
   "--seg-hue"?: string;
-  "--seg-hue-dim"?: string;
 };
 
 /**
- * Persistent 4-way game switcher (header, every screen).
- * Radio group, keyboard-navigable. Selection lives in the `?game=` searchParam;
- * updating it never scroll-jumps the feed.
+ * Persistent 4-way game switcher — full-width segmented control living inside the
+ * GameBand. Radio group, keyboard-navigable. Selection lives in the `?game=`
+ * searchParam; updating it never scroll-jumps the feed. Each segment carries its
+ * own game hue via `--seg-hue`; the checked segment paints with it.
  */
 export function GameSwitcher() {
   const router = useRouter();
@@ -65,12 +65,7 @@ export function GameSwitcher() {
             aria-checked={checked}
             tabIndex={checked ? 0 : -1}
             className="game-seg"
-            style={
-              {
-                "--seg-hue": `var(${g.hueToken})`,
-                "--seg-hue-dim": `var(${g.hueToken}-dim)`,
-              } as HueVars
-            }
+            style={{ "--seg-hue": `var(${g.hueToken})` } as HueVars}
             onClick={() => select(g.id)}
           >
             {g.label}

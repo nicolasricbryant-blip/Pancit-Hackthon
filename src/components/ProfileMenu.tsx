@@ -7,6 +7,7 @@ import styles from "./ProfileMenu.module.css";
 export interface ProfileMenuUser {
   displayName: string;
   handle: string | null;
+  avatarUrl: string | null;
 }
 
 function initials(name: string): string {
@@ -60,7 +61,12 @@ export function ProfileMenu({ user }: { user: ProfileMenuUser | null }) {
         aria-label={`Profile — ${user.displayName}`}
         onClick={() => setOpen((v) => !v)}
       >
-        {initials(user.displayName)}
+        {user.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={user.avatarUrl} alt="" className={styles.avatarImg} />
+        ) : (
+          initials(user.displayName)
+        )}
       </button>
 
       {open && (
@@ -73,12 +79,21 @@ export function ProfileMenu({ user }: { user: ProfileMenuUser | null }) {
           </div>
 
           <Link
-            href="/settings"
+            href="/profile"
             role="menuitem"
             className={styles.item}
             onClick={() => setOpen(false)}
           >
             My Profile
+          </Link>
+
+          <Link
+            href="/settings"
+            role="menuitem"
+            className={styles.item}
+            onClick={() => setOpen(false)}
+          >
+            Settings
           </Link>
 
           <form

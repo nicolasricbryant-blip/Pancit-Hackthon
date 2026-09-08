@@ -1,41 +1,77 @@
 /* TAMBAYAN design tokens — single source of truth.
    Imported by src/app/globals.css. Components reference these BY NAME only:
-   never inline an OKLCH / hex value in a component. */
+   never inline an OKLCH / hex value in a component.
+
+   THEME MODEL
+   -----------
+   Bare :root          → the LIGHT theme (blue / white). This is the default.
+   prefers-color-scheme: dark, when the user has NOT forced a theme → dark values.
+   :root[data-theme="dark"]   → dark, forced by the in-app toggle (wins over OS).
+   :root[data-theme="light"]  → light, forced by the toggle (blocks the OS dark rule).
+
+   Only COLOUR tokens change between themes. Space / type / radius / easing /
+   duration / shell-metric tokens are theme-invariant and live in :root once. */
 
 :root {
-  /* paper + surfaces */
-  --color-paper: oklch(15% 0.015 255);
-  --color-surface-1: oklch(19% 0.018 255);
-  --color-surface-2: oklch(23% 0.02 255);
-  --color-surface-3: oklch(28% 0.022 255);
+  color-scheme: light;
 
-  /* ink */
-  --color-ink: oklch(96% 0.01 255);
-  --color-ink-dim: oklch(72% 0.015 255);
-  --color-ink-mute: oklch(55% 0.015 255);
+  /* paper + surfaces — near-white paper, white cards */
+  --color-paper: oklch(97.6% 0.004 255);
+  --color-surface-1: oklch(100% 0 0);
+  --color-surface-2: oklch(96.3% 0.005 255);
+  --color-surface-3: oklch(93% 0.009 255);
+
+  /* ink — cool near-black */
+  --color-ink: oklch(24% 0.03 262);
+  --color-ink-dim: oklch(44% 0.025 262);
+  --color-ink-mute: oklch(57% 0.02 262);
 
   /* hairline */
-  --color-line: oklch(32% 0.02 255);
+  --color-line: oklch(90% 0.01 255);
 
-  /* UI accent — neutral cool, NOT a game colour */
-  --color-accent: oklch(70% 0.03 250);
-  --color-accent-ink: oklch(18% 0.02 250);
+  /* UI accent — the blue (focus rings, hairline emphasis) */
+  --color-accent: oklch(52% 0.16 250);
+  --color-accent-ink: oklch(99% 0.01 250);
 
-  /* game hues — the chromatic system (4 distinct, evenly spread) + dim variants */
-  --game-mlbb: oklch(72% 0.15 230);
-  --game-mlbb-dim: oklch(40% 0.09 230);
-  --game-valorant: oklch(62% 0.20 25);
-  --game-valorant-dim: oklch(38% 0.12 25);
-  --game-dota: oklch(68% 0.17 150);
-  --game-dota-dim: oklch(38% 0.10 150);
-  --game-codm: oklch(75% 0.15 75);
-  --game-codm-dim: oklch(42% 0.09 75);
+  /* primary action — flat blue (CTAs, active nav, stepper). Hover = darker in light. */
+  --color-primary: oklch(52% 0.17 250);
+  --color-primary-hi: oklch(46% 0.17 250);
+  --color-primary-ink: oklch(99% 0.005 250);
+
+  /* game hues — the chromatic system (4 distinct, evenly spread).
+     `-dim` is a pale background tint in the light theme. */
+  --game-mlbb: oklch(52% 0.14 233);
+  --game-mlbb-dim: oklch(94% 0.04 233);
+  --game-valorant: oklch(54% 0.2 25);
+  --game-valorant-dim: oklch(95% 0.035 25);
+  --game-dota: oklch(50% 0.14 155);
+  --game-dota-dim: oklch(94% 0.045 155);
+  --game-codm: oklch(57% 0.13 70);
+  --game-codm-dim: oklch(95% 0.05 70);
 
   /* status */
-  --color-ok: oklch(68% 0.17 150);
-  --color-warn: oklch(75% 0.15 75);
-  --color-danger: oklch(62% 0.20 25);
-  --color-verified: oklch(72% 0.15 230);
+  --color-ok: oklch(52% 0.14 155);
+  --color-warn: oklch(60% 0.13 70);
+  --color-danger: oklch(54% 0.2 25);
+  --color-verified: oklch(52% 0.15 245);
+
+  /* per-game header context band — pale hue wash behind the game selector */
+  --game-mlbb-band: oklch(96.5% 0.025 233);
+  --game-valorant-band: oklch(96.5% 0.03 25);
+  --game-dota-band: oklch(96.5% 0.028 155);
+  --game-codm-band: oklch(96.5% 0.035 70);
+
+  /* leaderboard top-3 — restrained metallics */
+  --medal-1: oklch(68% 0.13 85);
+  --medal-2: oklch(62% 0.02 255);
+  --medal-3: oklch(52% 0.11 55);
+
+  /* ---- theme-invariant below this line ---- */
+
+  /* shell metrics — bottom tab bar (mobile) / left rail (desktop) */
+  --header-h: 52px;
+  --tabbar-h: 58px;
+  --rail-w: 78px;
 
   /* space — 4pt scale */
   --space-2xs: 4px;
@@ -61,6 +97,7 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 14px;
+  --radius-xl: 20px;
 
   /* easings */
   --ease-out: cubic-bezier(.2, .7, .3, 1);
@@ -71,7 +108,107 @@
   --dur-fast: 120ms;
   --dur-mid: 200ms;
 
-  /* current game hue — set per-view by the feed wrapper, defaults to mlbb */
+  /* current game hue — set per-view by the feed wrapper, defaults to mlbb.
+     A view that switches game must set all three in lockstep. */
   --game-current: var(--game-mlbb);
   --game-current-dim: var(--game-mlbb-dim);
+  --game-current-band: var(--game-mlbb-band);
+}
+
+/* ============================================================================
+   DARK THEME — colour tokens only.
+   Applied when the OS prefers dark AND the user hasn't forced light,
+   OR when the toggle has forced dark. The two selectors carry identical
+   values on purpose (per the theme model above).
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --color-paper: oklch(15% 0.015 255);
+    --color-surface-1: oklch(19% 0.018 255);
+    --color-surface-2: oklch(23% 0.02 255);
+    --color-surface-3: oklch(28% 0.022 255);
+
+    --color-ink: oklch(96% 0.01 255);
+    --color-ink-dim: oklch(72% 0.015 255);
+    --color-ink-mute: oklch(55% 0.015 255);
+
+    --color-line: oklch(32% 0.02 255);
+
+    --color-accent: oklch(70% 0.03 250);
+    --color-accent-ink: oklch(18% 0.02 250);
+
+    --color-primary: oklch(64% 0.17 250);
+    --color-primary-hi: oklch(70% 0.17 250);
+    --color-primary-ink: oklch(16% 0.02 250);
+
+    --game-mlbb: oklch(72% 0.15 230);
+    --game-mlbb-dim: oklch(40% 0.09 230);
+    --game-valorant: oklch(62% 0.2 25);
+    --game-valorant-dim: oklch(38% 0.12 25);
+    --game-dota: oklch(68% 0.17 150);
+    --game-dota-dim: oklch(38% 0.1 150);
+    --game-codm: oklch(75% 0.15 75);
+    --game-codm-dim: oklch(42% 0.09 75);
+
+    --color-ok: oklch(68% 0.17 150);
+    --color-warn: oklch(75% 0.15 75);
+    --color-danger: oklch(62% 0.2 25);
+    --color-verified: oklch(72% 0.15 230);
+
+    --game-mlbb-band: oklch(21% 0.045 230);
+    --game-valorant-band: oklch(21% 0.05 25);
+    --game-dota-band: oklch(21% 0.045 150);
+    --game-codm-band: oklch(21% 0.045 75);
+
+    --medal-1: oklch(80% 0.13 85);
+    --medal-2: oklch(82% 0.02 255);
+    --medal-3: oklch(66% 0.11 55);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-paper: oklch(15% 0.015 255);
+  --color-surface-1: oklch(19% 0.018 255);
+  --color-surface-2: oklch(23% 0.02 255);
+  --color-surface-3: oklch(28% 0.022 255);
+
+  --color-ink: oklch(96% 0.01 255);
+  --color-ink-dim: oklch(72% 0.015 255);
+  --color-ink-mute: oklch(55% 0.015 255);
+
+  --color-line: oklch(32% 0.02 255);
+
+  --color-accent: oklch(70% 0.03 250);
+  --color-accent-ink: oklch(18% 0.02 250);
+
+  --color-primary: oklch(64% 0.17 250);
+  --color-primary-hi: oklch(70% 0.17 250);
+  --color-primary-ink: oklch(16% 0.02 250);
+
+  --game-mlbb: oklch(72% 0.15 230);
+  --game-mlbb-dim: oklch(40% 0.09 230);
+  --game-valorant: oklch(62% 0.2 25);
+  --game-valorant-dim: oklch(38% 0.12 25);
+  --game-dota: oklch(68% 0.17 150);
+  --game-dota-dim: oklch(38% 0.1 150);
+  --game-codm: oklch(75% 0.15 75);
+  --game-codm-dim: oklch(42% 0.09 75);
+
+  --color-ok: oklch(68% 0.17 150);
+  --color-warn: oklch(75% 0.15 75);
+  --color-danger: oklch(62% 0.2 25);
+  --color-verified: oklch(72% 0.15 230);
+
+  --game-mlbb-band: oklch(21% 0.045 230);
+  --game-valorant-band: oklch(21% 0.05 25);
+  --game-dota-band: oklch(21% 0.045 150);
+  --game-codm-band: oklch(21% 0.045 75);
+
+  --medal-1: oklch(80% 0.13 85);
+  --medal-2: oklch(82% 0.02 255);
+  --medal-3: oklch(66% 0.11 55);
 }

@@ -27,6 +27,7 @@ export const ROUTES = {
   freeAgents: "/free-agents",
   mentorship: "/mentorship",
   orgs: "/orgs",
+  more: "/more",
   signIn: "/sign-in",
   signUp: "/sign-up",
   onboarding: "/onboarding",
@@ -46,6 +47,25 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: ROUTES.rank, label: "My Rank", roles: ["player", "admin"], gameScoped: true },
   { href: ROUTES.rankReview, label: "Review Queue", roles: ["admin"], gameScoped: false },
 ];
+
+/**
+ * The mobile bottom tab bar + desktop left rail. Exactly five slots: four real
+ * destinations plus "More", which surfaces everything in PRIMARY_NAV that isn't
+ * already a tab (role-gating still applies there). Order is deliberate — Scrims
+ * is home, Leaderboards is the showpiece, Events carries the offline-community
+ * pillar.
+ */
+export const TAB_NAV: NavItem[] = [
+  { href: ROUTES.scrims, label: "Scrims", gameScoped: true },
+  // short tab label — the full destination is "Leaderboards"
+  { href: ROUTES.leaderboards, label: "Ladder", gameScoped: true },
+  { href: ROUTES.teams, label: "Teams", gameScoped: true },
+  { href: ROUTES.events, label: "Events", gameScoped: true },
+  { href: ROUTES.more, label: "More" },
+];
+
+/** hrefs that live in the tab bar — used to compute the "More" overflow set. */
+export const TAB_HREFS: ReadonlySet<string> = new Set(TAB_NAV.map((t) => t.href));
 
 /** Append the current game param to a nav href when the item is game-scoped. */
 export function withGame(href: string, game: string | null | undefined): string {

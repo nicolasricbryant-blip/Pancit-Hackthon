@@ -1,48 +1,37 @@
 import Link from "next/link";
-import { Suspense } from "react";
-import { GameSwitcher } from "./GameSwitcher";
-import { AppNav } from "./AppNav";
 import { ProfileMenu } from "./ProfileMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { getCurrentProfile } from "@/features/auth/session";
-import { navRoles } from "@/features/auth/roles";
 
 /**
- * Sticky app shell: top bar (wordmark · game switcher · profile) + primary nav strip.
- * Present on every screen. The profile menu and role-gated nav read the current
- * profile (shared via React `cache()` with the root layout — one query per request).
+ * Slim top bar: wordmark (home link) on the left, profile menu on the right.
+ * Sticky on every screen. The game selector now lives in <GameBand>, and the
+ * primary nav is the bottom tab bar / left rail (<AppNav>) — both rendered by
+ * the root layout, not here.
  */
 export async function AppHeader() {
   const profile = await getCurrentProfile();
-  const roles = navRoles(profile);
 
   return (
-    <header className="app-header-wrap">
-      <div className="app-header">
-        <Link href="/" className="wordmark">
-          TAMBAYAN
-        </Link>
+    <header className="app-header">
+      <Link href="/" className="wordmark">
+        TAMBAYAN
+      </Link>
 
-        <div className="header-center">
-          <Suspense fallback={<div className="game-switcher" aria-hidden />}>
-            <GameSwitcher />
-          </Suspense>
-        </div>
-
+      <div className="app-header-right">
+        <ThemeToggle />
         <ProfileMenu
           user={
             profile
               ? {
                   displayName: profile.display_name ?? "Player",
                   handle: profile.handle,
+                  avatarUrl: profile.avatar_url ?? null,
                 }
               : null
           }
         />
       </div>
-
-      <Suspense fallback={<div className="app-nav" aria-hidden />}>
-        <AppNav roles={roles} />
-      </Suspense>
     </header>
   );
 }

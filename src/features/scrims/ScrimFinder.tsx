@@ -42,6 +42,10 @@ export function ScrimFinder({
     setFilters((f) => ({ ...f, ...p }));
   const clear = () => setFilters(EMPTY_FILTERS);
 
+  const filtersActive = Boolean(
+    filters.rankBand || filters.timeWindow || filters.format,
+  );
+
   return (
     <>
       <FilterBar
@@ -51,8 +55,10 @@ export function ScrimFinder({
         onClear={clear}
       />
 
-      <p className="result-count">
-        {results.length} {results.length === 1 ? "team" : "teams"} available
+      <p className="feed-count">
+        {filtersActive
+          ? `${results.length} shown`
+          : `Showing all ${results.length}`}
       </p>
 
       <div className="feed-grid">

@@ -2,7 +2,6 @@
 
 import {
   SCRIM_FORMATS,
-  TIME_WINDOWS,
   type ScrimFormat,
   type TimeWindow,
 } from "./types";
@@ -18,6 +17,14 @@ export const EMPTY_FILTERS: FilterState = {
   timeWindow: "",
   format: "",
 };
+
+/** Segmented time-window axis. "Custom" is a filter-state value with no UI. */
+const TIME_CHIPS: Array<{ label: string; value: "" | TimeWindow }> = [
+  { label: "All", value: "" },
+  { label: "Tonight", value: "Tonight" },
+  { label: "This Week", value: "This Week" },
+  { label: "Weekend", value: "Weekend" },
+];
 
 interface Props {
   /** Rank tiers for the currently selected game. */
@@ -35,57 +42,62 @@ export function FilterBar({ rankTiers, value, onChange, onClear }: Props) {
 
   return (
     <div className="filter-bar" role="search" aria-label="Filter scrims">
-      <label className="filter-field">
-        <span className="filter-label">Rank Band</span>
-        <select
-          className="filter-select"
-          value={value.rankBand}
-          onChange={(e) => onChange({ rankBand: e.target.value })}
-        >
-          <option value="">All ranks</option>
-          {rankTiers.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div
+        className="chip-scroll"
+        role="group"
+        aria-label="Time window"
+      >
+        {TIME_CHIPS.map((c) => {
+          const active = value.timeWindow === c.value;
+          return (
+            <button
+              key={c.label}
+              type="button"
+              className="chip-toggle"
+              aria-pressed={active}
+              onClick={() => onChange({ timeWindow: c.value })}
+            >
+              {c.label}
+            </button>
+          );
+        })}
+      </div>
 
-      <label className="filter-field">
-        <span className="filter-label">Time Window</span>
-        <select
-          className="filter-select"
-          value={value.timeWindow}
-          onChange={(e) =>
-            onChange({ timeWindow: e.target.value as FilterState["timeWindow"] })
-          }
-        >
-          <option value="">Any time</option>
-          {TIME_WINDOWS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="filter-selects">
+        <label className="filter-field">
+          <span className="filter-label">Rank</span>
+          <select
+            className="filter-select"
+            value={value.rankBand}
+            onChange={(e) => onChange({ rankBand: e.target.value })}
+          >
+            <option value="">All ranks</option>
+            {rankTiers.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      <label className="filter-field">
-        <span className="filter-label">Format</span>
-        <select
-          className="filter-select"
-          value={value.format}
-          onChange={(e) =>
-            onChange({ format: e.target.value as FilterState["format"] })
-          }
-        >
-          <option value="">Any format</option>
-          {SCRIM_FORMATS.map((f) => (
-            <option key={f} value={f}>
-              {f}
-            </option>
-          ))}
-        </select>
-      </label>
+        <label className="filter-field">
+          <span className="filter-label">Format</span>
+          <select
+            className="filter-select"
+            value={value.format}
+            onChange={(e) =>
+              onChange({ format: e.target.value as FilterState["format"] })
+            }
+          >
+            <option value="">Any format</option>
+            {SCRIM_FORMATS.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       {chips.length > 0 && (
         <div className="chip-row">
