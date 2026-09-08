@@ -1,71 +1,66 @@
 # HANDOFF — TAMBAYAN
 
-PH collegiate esports scrim network. PWA. Next.js 16 (App Router, Turbopack) + React 19 + TS strict + Tailwind v4 (CSS-first, NO config) + Supabase (@supabase/ssr).
+PH collegiate esports scrim network. PWA. Next.js 16 (App Router, Turbopack) + React 19 + TS strict + Tailwind v4 (CSS-first, no config) + Supabase (@supabase/ssr).
 
 ## Live
 
-- **App (prod):** https://tambayan-red.vercel.app
+- **Prod:** https://tambayan-red.vercel.app
 - **Repo:** https://github.com/nicolasricbryant-blip/Pancit-Hackthon (branch `master`)
-- **Vercel project:** `tambayan` (org nicolasricbryant-9459). GitHub push to `master` now builds a **Preview only** — production is NOT auto-followed. Promote with `vercel promote <preview-url> --yes` (or `vercel --prod`). Env vars set (prod/preview/dev): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- **Supabase:** project ref `didlozqquuszabfbznll`. GitHub-connected → `supabase/migrations/*` auto-apply on push (all idempotent + already recorded in `schema_migrations`). Auth `site_url` + allow-list point at the Vercel domain + localhost.
+- **Vercel:** project `tambayan` (org nicolasricbryant-9459). **`vercel --prod --yes` from the CLI builds AND aliases `tambayan-red.vercel.app` directly** — the old "git push = Preview only, promote manually" step did NOT recur this session. Env vars set (prod/preview/dev): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Supabase:** ref `didlozqquuszabfbznll`. GitHub-connected → `supabase/migrations/*` auto-apply on push (all idempotent). Migrations also applied live this session via Management API (`api.supabase.com/v1/projects/<ref>/database/query`, needs a browser-ish `User-Agent` or Cloudflare 403s).
 
-## What ships (done, deployed)
+## Wave 4 — SHIPPED + DEPLOYED (2026-09-08, commits `9beb817` + `f1fdaab`, pushed + live)
 
-- **Scaffold + design system** — hallmark: atmospheric/Workbench, custom dark theme, 4 game-hue tokens (mlbb/valorant/dota/codm). Tokens in `tokens.css`. Space Grotesk + Inter + JetBrains Mono.
-- **App shell** — sticky header: wordmark · 4-way game switcher (`?game=`) · profile menu. Primary nav strip (role-gated). PWA manifest + SW + real icons (from `pwa icon.jpg`).
-- **Auth** (`src/features/auth`, `src/app/(auth)`, `src/proxy.ts`) — sign-up (any email, role select player/handler/both), sign-in (password), sign-out, `/onboarding` (handle/roles/school/region), `/settings` (name/region/exam-week toggle). `mailer_autoconfirm = ON` — no email verify for pilot. Session helpers: `getCurrentProfile()` / `getUser()` / `requireProfile()` + `roles.ts` + `useAuth()`.
-- **Scrim Finder** (`/`) — filterable feed, reads LIVE `scrim_listings` (join teams/schools/ratings/reliability) via `src/features/scrims/queries.ts`.
-- **Rank** (`/rank`, `/rank/submit`, `/rank/review`) — per-game submission form (config-driven; `peak`/`mode` now selects), screenshot → `rank-proofs` bucket, pending/verified, admin review queue. Trusted-submitter auto-approve trigger.
-- **Teams** (`/teams`, `/teams/new`, `/teams/[id]`, `/teams/[id]/manage`) — browse, profile (rating ‖ standing), create, roster. Game-switch now moves the `ratings` row.
-- **Leaderboards** (`/leaderboards`) — team+player boards, rating|standing sort, region/school filters, **scope toggle: nationwide / regional / my-school**. Player board fills after a bracket match advances.
-- **Match Room** (`/matches`, `/matches/[id]`) — locked ruleset, countdown, dual-confirm results → **Elo recompute (DB trigger) + reliability + standing**. Head-to-head panel on the detail page.
-- **Events** (`/events`, `/events/new`, `/events/[id]`) — meetups+online feed, announcements, RSVP, QR check-in, exam-week banner. `datetime-local` now pinned to Asia/Manila.
-- **Brackets** (`/brackets`, `/brackets/[slug]`, `/brackets/new`, `/brackets/[slug]/manage`) — seeded single-elim tournaments; host seeds/generates + reports scores; winner propagates; completion feeds Elo + player ratings + standing. Demo: 4-team MLBB `tambayan-mlbb-season-0`.
-- **Orgs** (`/orgs`, `/orgs/[slug]`, `/orgs/new`, `/orgs/[slug]/manage`) — varsity/community/league pages; members; org↔team link. 3 demo orgs.
-- **Free agents** (`/free-agents`, `/free-agents/new`) — seeking-team / seeking-player board, game-scoped, close own post.
-- **Mentorship** (`/mentorship`, `/mentorship/new`) — auth-gated; request VOD-review/coaching/general; a mentor accepts via SECURITY DEFINER RPC.
-- **PWA native feel** — viewport locked + `touch-action` + `NativeFeelGuard` iOS gesture/double-tap suppression.
+De-slop redesign toward a native-app feel + two new features. Grounded in real peers (AcadArena, start.gg, Faceit, VLR.gg) + user mockups.
 
-## DB
+### Shell redesign
+- **Bottom tab bar (mobile) / left rail (desktop)** — `AppNav` renders `TAB_NAV` (Scrims · Ladder→/leaderboards · Teams · Events · More). Everything else lives on **`/more`** (server page, role-filtered from `PRIMARY_NAV` minus `TAB_HREFS`).
+- **Game context band** (`GameBand.tsx`, client) under the slim top bar — sticky, full-width, background = a dim tint of the active game hue (`--game-<id>-band`), retints on `?game=` change. Holds the restyled full-width segmented `GameSwitcher`.
+- Top bar slimmed to wordmark + `ThemeToggle` + `ProfileMenu`.
 
-24 tables + 1 view + RLS. Migrations `20260906010001`–`010011`:
-- 01 core schema · 02 RLS · 03 reference seed · 04 demo seed · 05 auth profile trigger · 06 rank-proofs storage · 07 wave2 RLS deltas · 08 demo matches
-- **09 wave3 schema** — `profiles.onboarded / school_other / trusted_submitter`; `orgs` + `org_members` + `teams.org_id` + `is_org_admin()`; Elo trigger `apply_match_result()` on confirmed `scrim_matches`; `recompute_reliability_score()` (score = 100 − no_shows·8 − early_quits·4); `report_no_show()` RPC; `head_to_head` view; `fast_track_trusted_submission()` rank trigger; per-game form_fields updated (valorant peak / codm mode carry `options`)
-- **10 mentorship RPCs** — `list_open_mentorships(p_game)`, `accept_mentorship(p_id)` (both SECURITY DEFINER, granted to authenticated)
-- **11 brackets** — `tournaments` + `tournament_entrants` + `bracket_matches`; `generate_bracket()` (seeded single-elim, power-of-two, host-only) + `advance_bracket_match()` (winner propagation + Elo + community standing + player-rating mirror). Demo: 4-team MLBB `tambayan-mlbb-season-0`, status `live`.
+### Light / dark theme
+- **`tokens.css` rebuilt**: bare `:root` = LIGHT (blue/white) default. Dark = `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` + `:root[data-theme="dark"]`. Only colour tokens swap; space/type/radius/etc theme-invariant.
+- **`ThemeToggle.tsx`** in the header — `useSyncExternalStore`, writes `data-theme` on `<html>`, persists `localStorage['tambayan-theme']`, forced choice wins over OS both ways.
+- **Anti-flash**: plain `<script>` in `<head>` in `layout.tsx` reads localStorage pre-paint. (React dev-only warns "script tag while rendering" — harmless, absent in prod build. Stale-tab console spew during dev is dead-HMR-socket buffer, not real — a fresh tab + the prod build are clean.)
+- `viewport.colorScheme = "light dark"`, dual `themeColor`.
+- New tokens: `--color-primary/-hi/-ink` (flat blue), `--medal-1/2/3`, `--radius-xl`, shell metrics (`--header-h/--tabbar-h/--rail-w`), per-game `--game-*-band`.
 
-All 3 applied LIVE via Management API this session (also auto-apply on push; idempotent). Types regenerated → `src/lib/db/types.ts`.
+### Scrim Finder home (`/`)
+- `FinderHero` strip replaces the `page-title`/`page-sub` template.
+- `TeamCrest` initials monogram on every card. Honest **time pill** (TONIGHT highlighted vs the window label — NO fabricated slot counts, no data for them). 2-up stat tiles (Rating / Reliability, mono). Chip-first `FilterBar` (time window = segmented chips; rank + format = compact selects). Request button now `--color-primary` (blue), not the game hue. Card hover = border/bg shift, no translateY.
 
-Verify build: `npx tsc --noEmit && npm run lint && npm run build` — all green as of commit `be08b47`.
+### Profile (`/profile`) + avatars
+- New `/profile` screen: identity header w/ avatar, role chips, 3 stat tiles (Scrims/Wins/WinRate — **all `—`, no per-player source in schema**), tabs **Game Profiles | Account**.
+- `AvatarUpload.tsx` — validates image ≤2MB, uploads to Storage `avatars/<uid>/…`, sets `profiles.avatar_url`, `router.refresh()`. Wired into `ProfileMenu` (replaces initials).
+- `game_profiles` cards now carry: **`MainRolePicker`** (multi-select from `GAMES[].roles`, saves `game_profiles.main_roles`) + **`AutoJoinControl`** (toggle → `enable_autojoin` RPC with rank/mode/mic settings).
+- Migration `20260908010012_storage_avatars.sql` — public `avatars` bucket, owner-scoped writes. (`profiles.avatar_url` already existed.)
 
-## DONE this session (commits `be08b47` + `66ca536`, PUSHED + DEPLOYED to prod)
+### Lobbies + role-based auto-join matchmaking
+Pickup groups for ranked/casual — distinct from Scrims (team-v-team) and Free Agents (roster recruitment).
+- **Migration `20260908010013_lobbies.sql`** (applied live): `lobbies`, `lobby_members`, `lobby_autojoin_prefs`, `game_profiles.main_roles`. Triggers: host auto-added on lobby insert; `lobbies.status` auto-syncs open↔full on member change; a freed slot re-runs the matchmaker. RPCs: `run_lobby_matchmaker` (role overlap OR either side has `Flex` + rank range via `games.rank_tiers` index + mode + mic), `enable_autojoin` (upsert prefs + back-scan ≤20 open lobbies), `lobby_accept_match` (ready-check accept), `expire_stale_lobbies` (lazy housekeeping, called from `/lobbies` server component), `lobby_rank_ok` (helper). Owner INSERT/UPDATE RLS added to `game_profiles`.
+- **Auto-join model** (user-chosen): **ready-check**. Matched player is inserted `state='pending'` with `ready_by = now()+60s`; `/lobbies/[id]` shows "matched as {role} — Ready / Not now" + countdown. Ready → `lobby_accept_match`. Decline/timeout → row deleted (RLS self-delete), matchmaker refills.
+- **Roles** in `config.ts` per game (`GAMES[].roles`), each ending in `Flex` (matches any needed role).
+- UI: `/lobbies` (game-scoped list, mode + fits-my-role filters, `expire_stale_lobbies` on load), `/lobbies/new` (host form), `/lobbies/[id]` (roster, join/leave, host close+remove, ready-check, 10s `router.refresh()` poll). `/lobbies` in `PRIMARY_NAV` → shows under **More**.
 
-Prod deploy: `tambayan-598xb2rs7` (promoted via `vercel promote`). Live routes verified 200: `/ /brackets /brackets/[slug] /orgs /free-agents /leaderboards`; `/mentorship` → 307 sign-in. Live prod serves wave-3 DB (Elo ratings, 4-team bracket).
+## DB — 26 tables + views + RLS. Migrations `…010001`–`…010013`.
+- 12 storage_avatars · 13 lobbies (see above). Types regenerated → `src/lib/db/types.ts` (via Management API `/types/typescript`).
+- Build: `npx tsc --noEmit && npm run lint && npm run build` — all green as of `f1fdaab`. Prod build compiles all 40 routes clean.
 
+## STILL OPEN / NEXT
 
-1. ✅ Onboarding — `profiles.onboarded` flag; proxy trap keyed on it; school + region optional; "my school isn't listed" free-text path (`profiles.school_other`).
-2. ⚠️ Live auth E2E — still NOT run. Claude can't create accounts / enter passwords. Needs a human: signup (Gmail + `.edu.ph`) → onboarding → signin → check `profiles` row (onboarded, roles, school_id/school_other, school_verified).
-3. ✅ Browser QA — all new routes + scrims/leaderboards/brackets/orgs checked at 375 + desktop, console/server logs clean. Full pass at 320/768 still worth doing.
-4. ✅ Scrim Finder now reads live `scrim_listings` (via `src/features/scrims/queries.ts`); mock `seed.ts` deleted. `SkeletonCard.tsx` now orphaned (harmless).
-5. ✅ `src/lib/db/types.ts` regenerated (3×).
-6. ✅ Review nits — teams game-switch moves the `ratings` row; events `datetime-local` pinned to Asia/Manila (`manilaLocalToIso`); rank `peak`/`mode` render as selects (form-field `options`).
-7. ⚠️ **Supabase PAT STILL NEEDS ROTATING** — a `sbp_…` token was pasted in chat again this session and used for live migration apply + type gen. Rotate: Supabase dashboard → Account → Access Tokens. Consider storing the next one in `.env.local` (git-ignored) instead of chat.
-8. ✅ ALL stretch features built: free-agent board (`/free-agents`), reliability auto-calc (trigger), mentorship (`/mentorship`), head-to-head (Match Room panel), trusted-submitter fast-track (trigger), org pages (`/orgs`), **bracketing** (`/brackets`), leaderboard local/regional/nationwide scope toggle.
-9. ✅ Stage 1 abstract → `docs/stage1-abstract.md` (2 pages, 4 sections) + `docs/stage1-wireframe.svg` (5 mobile frames). `docs/handoff.md` is still the original brief.
-
-## NEXT
-
-- **Live auth E2E** (item 2) — human-run: signup (Gmail + `.edu.ph`) → onboarding → signin → check `profiles` row (onboarded, roles, school_id/school_other, school_verified).
-- **Rotate the Supabase PAT** (item 7) — `sbp_…` pasted in chat again this session; used for live migration apply + type gen. Dashboard → Account → Access Tokens. Put the next one in `.env.local`.
-- QA at 320px / 768px; nav strip is now 10 items (scrolls on mobile — check it feels ok).
-- Player leaderboard fills only after a bracket match is advanced (player ratings mirror team rating on `advance_bracket_match`).
-- `src/features/scrims/SkeletonCard.tsx` orphan cleanup (no importers after the live-DB wire).
-- Vercel: consider re-enabling git auto-promote to production (Project → Settings → Git) so future `master` pushes deploy prod without a manual `vercel promote`.
+- **UNTESTED — needs a human signed-in pass** (Claude can't auth): sign-in E2E, avatar upload, create lobby → join → leave, host close/remove, the 60s ready-check, `MainRolePicker` save, `AutoJoinControl` toggle + the matchmaker actually placing someone. All compile + the prod build passes; runtime behaviour of the authed paths is unverified.
+- **ROTATE THE SUPABASE PAT** — a `sbp_…` token was pasted in chat AGAIN this session (4th time) and used for migrations 12/13 + type regen. Supabase → Account → Access Tokens → revoke. Store the next one in `.env.local` (git-ignored), never chat.
+- Player leaderboard + profile stat tiles: still no per-player Scrims/Wins/WinRate source. Add a `player_match_stats` view/table if those tiles should show real numbers.
+- Desktop shell polish: the wordmark sits alone top-left above the rail (reads as a logo lockup — acceptable, could move into the rail). "Sign in" button uses default styling.
+- Realtime for `/lobbies/[id]` — currently a 10s `router.refresh()` poll; swap to a Supabase Realtime subscription on `lobby_members` if it feels laggy.
+- Matchmaker runs synchronously in triggers/RPCs (no worker). Fine at pilot scale; revisit if lobby volume grows.
+- `src/features/scrims/SkeletonCard.tsx` — rebuilt to match the new card; still only used by the (now unused post-live-wire) skeleton path.
 
 ## Build/run
 
 ```
 npm run dev        # localhost:3000
-npm run build      # turbopack prod build
+npm run build      # turbopack prod build (all 40 routes)
+vercel --prod --yes   # build + deploy + alias tambayan-red.vercel.app
 ```
-`.env.local` has live Supabase creds (git-ignored). Supabase admin ops this session went through the Management API with the PAT (no service_role key in `.env.local`).
+`.env.local` has live Supabase anon creds (git-ignored). Admin ops go through the Management API with a PAT (no service_role key stored).
