@@ -1531,6 +1531,25 @@ export type Database = {
           },
         ]
       }
+      player_match_stats: {
+        Row: {
+          game_id: string | null
+          losses: number | null
+          profile_id: string | null
+          scrims: number | null
+          win_rate_pct: number | null
+          wins: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_mentorship: { Args: { p_id: string }; Returns: undefined }

@@ -89,12 +89,28 @@ export default async function ProfilePage() {
   const displayName = profile.display_name ?? "Player";
   const email = user.email ?? null;
 
-  // HONEST COPY: scrim_matches + bracket_matches are team-scoped — no clean
-  // per-player Scrims/Wins/Win-Rate source in the schema. Render em dash.
+  // player_match_stats approximates a player's record from CURRENT
+  // team_members roster against confirmed scrim_matches + bracket_matches
+  // (the schema has no per-match roster snapshot — see the view's comment).
+  // Summed across games for this overview tile row.
+  const { data: statRows } = await supabase
+    .from("player_match_stats")
+    .select("scrims, wins")
+    .eq("profile_id", profile.id);
+
+  const totalScrims = (statRows ?? []).reduce((n, r) => n + (r.scrims ?? 0), 0);
+  const totalWins = (statRows ?? []).reduce((n, r) => n + (r.wins ?? 0), 0);
+
   const stats: { label: string; value: string }[] = [
-    { label: "Scrims", value: "—" },
-    { label: "Wins", value: "—" },
-    { label: "Win Rate", value: "—" },
+    { label: "Scrims", value: totalScrims > 0 ? String(totalScrims) : "—" },
+    { label: "Wins", value: totalScrims > 0 ? String(totalWins) : "—" },
+    {
+      label: "Win Rate",
+      value:
+        totalScrims > 0
+          ? `${Math.round((100 * totalWins) / totalScrims)}%`
+          : "—",
+    },
   ];
 
   const gamePanel = (
@@ -199,7 +215,9 @@ export default async function ProfilePage() {
           <div key={s.label} className={styles.statTile}>
             <span className={styles.statValue}>{s.value}</span>
             <span className={styles.statLabel}>{s.label}</span>
-            <span className={styles.statCaption}>No matches yet</span>
+            {totalScrims === 0 && (
+              <span className={styles.statCaption}>No matches yet</span>
+            )}
           </div>
         ))}
       </div>
