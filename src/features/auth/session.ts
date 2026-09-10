@@ -12,13 +12,26 @@ import type { Profile } from "./types";
  * pass (layout, header, page) share a single round-trip.
  */
 
-/** The authenticated Supabase auth user, or null. */
+/**
+ * The authenticated Supabase auth user, or null.
+ *
+ * Swallows config/network failures (missing env, Supabase unreachable) and
+ * degrades to signed-out rather than crashing every page — the root layout
+ * calls this on every request, so a Supabase hiccup shouldn't 500 the whole
+ * site (the public landing page in particular must stay up). Logged so a
+ * real misconfiguration is still visible in server logs.
+ */
 export const getUser = cache(async (): Promise<User | null> => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user ?? null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user ?? null;
+  } catch (err) {
+    console.error("getUser: falling back to signed-out —", err);
+    return null;
+  }
 });
 
 /** The full `profiles` row for the current user, or null if signed out. */

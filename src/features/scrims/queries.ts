@@ -36,7 +36,16 @@ function toFormat(raw: string): ScrimFormat {
  * merged by id. All four tables are public SELECT (RLS `using(true)`).
  */
 export async function listScrimsForGame(game: GameId): Promise<ScrimListing[]> {
-  const supabase = await createClient();
+  // Reachable by signed-out visitors via the landing page's live-board preview
+  // link, so a Supabase config/outage issue must degrade to an empty feed —
+  // not crash the page — same as any other query failure below.
+  let supabase: Awaited<ReturnType<typeof createClient>>;
+  try {
+    supabase = await createClient();
+  } catch (err) {
+    console.error("listScrimsForGame: Supabase client unavailable —", err);
+    return [];
+  }
 
   const { data, error } = await supabase
     .from("scrim_listings")

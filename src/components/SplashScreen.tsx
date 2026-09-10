@@ -20,7 +20,7 @@ export function SplashScreen() {
         <div className="splash-bar">
           <div className="splash-bar-fill" />
         </div>
-        <p className="splash-footer">PANCIT HACKTHON</p>
+        <p className="splash-footer">PANCIT HACKATHON</p>
       </div>
     </div>
   );
