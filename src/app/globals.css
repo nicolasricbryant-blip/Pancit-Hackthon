@@ -110,12 +110,42 @@ h3,
 
 .wordmark {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
   font-size: var(--text-base);
   letter-spacing: -0.02em;
   color: var(--color-ink);
   text-decoration: none;
+}
+
+/* Brand mark — two flattened raster variants (navy for light theme, white for
+   dark) swapped with the same three-selector contract tokens.css uses for
+   colour. Not an SVG: extracted from a design screenshot, not a source asset —
+   swap for a vector lockup if/when the designer hands one over. */
+.wordmark-icon {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+.wordmark-icon--dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wordmark-icon--light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .wordmark-icon--dark {
+    display: block;
+  }
+}
+:root[data-theme="dark"] .wordmark-icon--light {
+  display: none;
+}
+:root[data-theme="dark"] .wordmark-icon--dark {
+  display: block;
 }
 
 /* Desktop: tie the wordmark cell to the rail below it — a divider at the
@@ -904,4 +934,136 @@ main {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-bottom: var(--space-sm);
+}
+
+/* ============================================================================
+   SPLASH SCREEN — first-load-only brand intro
+   ============================================================================
+   Server-rendered so it covers the very first paint (no flash of real content
+   before it appears). Always in the DOM; `:root[data-splash="skip"]` (set by
+   the inline script in <head>, same pattern as the theme anti-flash script)
+   hides it instantly for a repeat view in the same tab session. `SplashController`
+   (mounted client-side) drives the exit fade and sets the sessionStorage flag
+   once — deliberately brand-navy regardless of light/dark theme, not built
+   from the colour tokens. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fbfcfe 0%, #eef1f6 60%, #e4e8f0 100%);
+  opacity: 1;
+  transition: opacity 320ms ease-out;
+}
+:root[data-splash="skip"] .splash {
+  display: none;
+}
+.splash--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-marks {
+  position: relative;
+  margin-top: min(9vh, 72px);
+  width: min(56vw, 220px);
+  aspect-ratio: 480 / 438;
+}
+.splash-ghost,
+.splash-icon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.splash-ghost {
+  transform: translateY(-78%) scaleY(-1);
+  opacity: 0.35;
+  filter: blur(1px);
+  -webkit-mask-image: linear-gradient(to top, transparent, black 70%);
+  mask-image: linear-gradient(to top, transparent, black 70%);
+}
+
+.splash-word {
+  width: 100%;
+  box-sizing: border-box;
+  margin: var(--space-lg) 0 0;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.7rem, 8vw, 2.5rem);
+  letter-spacing: 0.01em;
+  color: #0e1a3a;
+  text-align: center;
+  padding-inline: var(--space-md);
+}
+.splash-tag {
+  width: 100%;
+  box-sizing: border-box;
+  margin: var(--space-xs) 0 0;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: #16234a;
+  text-align: center;
+  padding-inline: var(--space-lg);
+}
+
+.splash-chevron {
+  position: relative;
+  flex: 1;
+  margin-top: var(--space-lg);
+  width: 100%;
+  min-height: 34vh;
+  clip-path: polygon(0 22%, 50% 0, 100% 22%, 100% 100%, 0 100%);
+  background: linear-gradient(160deg, #16224a 0%, #0a1230 55%, #060a1c 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: var(--space-xl);
+}
+
+.splash-bar {
+  margin-top: min(14vh, 130px);
+  width: min(60vw, 260px);
+  height: 4px;
+  border-radius: 999px;
+  background: oklch(100% 0 0 / 0.18);
+  overflow: hidden;
+}
+.splash-bar-fill {
+  width: 45%;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+  animation: splash-progress 1.1s ease-in-out infinite alternate;
+}
+@keyframes splash-progress {
+  from {
+    transform: translateX(-10%);
+    width: 30%;
+  }
+  to {
+    transform: translateX(110%);
+    width: 45%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-bar-fill {
+    animation: none;
+    width: 60%;
+  }
+}
+
+.splash-footer {
+  margin: auto 0 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.28em;
+  color: oklch(100% 0 0 / 0.45);
+  text-transform: uppercase;
 }

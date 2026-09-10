@@ -1,0 +1,182 @@
+/* Sign-in landing hero. Deliberately brand-fixed, not built from the
+   light/dark colour tokens — same reasoning as the splash screen
+   (globals.css .splash): a fixed brand moment, not a themed app surface, so
+   every colour here is a literal value, not var(--color-*). */
+
+.hero {
+  /* The (auth) shell is a row flex container centering this card; flex items
+     default to min-width:auto (their content's intrinsic width), which can
+     refuse to shrink below that on a narrow screen instead of wrapping. */
+  min-width: 0;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid #dde1ea;
+}
+
+/* Hero art: a navy gradient placeholder, not the designer's character
+   illustration — see the PR description for why. Swap `background` for a
+   licensed/original image when one is available; the logo lockup and text
+   sit on top via `.heroArtHead` either way. */
+.heroArt {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  padding: var(--space-md);
+  background:
+    radial-gradient(120% 90% at 15% 15%, oklch(38% 0.07 255 / 0.55), transparent 60%),
+    linear-gradient(150deg, #16224a 0%, #0a1230 55%, #060a1c 100%);
+}
+
+.heroArtHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.heroArtIcon {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+.heroArtWord {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--text-lg);
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.heroBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-xl) var(--space-lg);
+  background: #fbfcfe;
+}
+
+.heroTitle {
+  margin: 0;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #0e1a3a;
+}
+.heroSub {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: #445;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.signInBtn,
+.createBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    filter var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.signInBtn {
+  color: #fff;
+  background: #0e1a3a;
+  border: 1px solid transparent;
+}
+.signInBtn:hover {
+  filter: brightness(1.15);
+}
+.signInBtn:focus-visible,
+.createBtn:focus-visible,
+.socialBtn:focus-visible {
+  outline: 2px solid #3b5bdb;
+  outline-offset: 2px;
+}
+.createBtn {
+  color: #0e1a3a;
+  background: transparent;
+  border: 1px solid #dde1ea;
+}
+.createBtn:hover {
+  border-color: #a9b2c6;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: #8891a6;
+  font-size: var(--text-xs);
+  text-transform: lowercase;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dde1ea;
+}
+
+.socialRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+.socialBtn {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  height: 44px;
+  background: #fff;
+  border: 1px solid #dde1ea;
+  border-radius: var(--radius-md);
+  cursor: not-allowed;
+  color: #445;
+}
+.socialBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.footer {
+  margin-top: var(--space-md);
+  text-align: center;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #99a0b2;
+}
+
+.back {
+  align-self: flex-start;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: #667;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.back:hover {
+  color: #0e1a3a;
+}

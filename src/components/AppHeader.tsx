@@ -15,6 +15,18 @@ export async function AppHeader() {
   return (
     <header className="app-header">
       <Link href="/" className="wordmark">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/logo-mark-light-theme.png"
+          alt=""
+          className="wordmark-icon wordmark-icon--light"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/logo-mark-dark-theme.png"
+          alt=""
+          className="wordmark-icon wordmark-icon--dark"
+        />
         TAMBAYAN
       </Link>
 
