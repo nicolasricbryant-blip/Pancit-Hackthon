@@ -6,9 +6,13 @@
 --     ratings, reliability_scores, community_standing,
 --     teams, profiles, schools, game_profiles
 --
--- 14 TEAM rows are already seeded across the 4 games. There are no PLAYER
--- (profile_id) rows in `ratings` yet, so the Player board renders a clean empty
--- state until the seed below is applied against real profiles.
+-- 14 TEAM rows are already seeded across the 4 games. PLAYER (profile_id) rows
+-- now populate automatically — `apply_match_result()` (scrims) and
+-- `advance_bracket_match()` (brackets) mirror a team's rating onto every
+-- current roster member's row when a match is confirmed (see migration
+-- 20260910010015_scrim_rating_mirror.sql). Until a game's first confirmed
+-- match, the Player board still renders a clean empty state; the seed below
+-- is a manual shortcut for demoing it before real matches exist.
 -- ============================================================================
 
 
