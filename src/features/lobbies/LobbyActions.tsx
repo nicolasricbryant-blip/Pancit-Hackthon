@@ -23,12 +23,12 @@ interface Props {
   isHost: boolean;
 }
 
-const POLL_MS = 10_000;
-
 /**
  * All viewer-facing lobby actions in one client island: join / leave, the
- * pending ready-check with countdown, and the host's close control. Polls
- * `router.refresh()` every 10s for cheap live-ish state; no Realtime in v1.
+ * pending ready-check with countdown, and the host's close control. Live
+ * state comes from a Supabase Realtime subscription on `lobby_members` +
+ * `lobbies` for this lobby (roster joins/leaves, host close, the
+ * open↔full auto-sync trigger) rather than a poll.
  */
 export function LobbyActions({
   lobbyId,
@@ -42,9 +42,35 @@ export function LobbyActions({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = setInterval(() => router.refresh(), POLL_MS);
-    return () => clearInterval(t);
-  }, [router]);
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`lobby-${lobbyId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "lobby_members",
+          filter: `lobby_id=eq.${lobbyId}`,
+        },
+        () => router.refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "lobbies",
+          filter: `id=eq.${lobbyId}`,
+        },
+        () => router.refresh(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [lobbyId, router]);
 
   const refresh = () => router.refresh();
 

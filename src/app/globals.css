@@ -118,6 +118,21 @@ h3,
   text-decoration: none;
 }
 
+/* Desktop: tie the wordmark cell to the rail below it — a divider at the
+   rail's own width/border, so the top-left corner reads as one brand column
+   instead of the wordmark floating alone above the rail. */
+@media (min-width: 768px) {
+  .app-header::after {
+    content: "";
+    position: absolute;
+    left: var(--rail-w);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-line);
+  }
+}
+
 .app-header-right {
   flex: 0 0 auto;
   display: flex;
