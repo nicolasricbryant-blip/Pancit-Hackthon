@@ -7,6 +7,8 @@ import { GameBand } from "@/components/GameBand";
 import { AppNav } from "@/components/AppNav";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { NativeFeelGuard } from "@/components/NativeFeelGuard";
+import { SplashScreen } from "@/components/SplashScreen";
+import { SplashController } from "@/components/SplashController";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { getCurrentProfile } from "@/features/auth/session";
 import { navRoles } from "@/features/auth/roles";
@@ -70,13 +72,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {/* Runs once before first paint: applies a stored theme choice so a
             saved dark pref doesn't flash the light default. No stored choice →
             attribute stays unset and tokens.css follows the OS media query.
+            Also skips the splash screen if this tab already showed it this
+            session (data-splash="skip", read by .splash in globals.css) — same
+            reasoning as the theme flag: a synchronous pre-paint check, not a
+            client-mounted one, so there's no flash of the thing being hidden.
             (React dev-only warns "script tag while rendering" — harmless, gone
             in the production build; the tag is server-emitted and never needs
             to re-run on client navigation.) */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('tambayan-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}",
+              "try{var t=localStorage.getItem('tambayan-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}" +
+              "try{if(sessionStorage.getItem('tambayan-splash-shown')==='1')document.documentElement.dataset.splash='skip';}catch(e){}",
           }}
         />
       </head>
@@ -93,6 +100,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </AuthProvider>
         <ServiceWorkerRegister />
         <NativeFeelGuard />
+        <SplashScreen />
+        <SplashController />
       </body>
     </html>
   );

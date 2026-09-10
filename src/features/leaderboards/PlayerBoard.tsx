@@ -41,9 +41,11 @@ function VerifiedMark() {
 /**
  * Async server view — player standings for the selected game + filters.
  *
- * No player (profile_id) ratings are seeded yet, so this renders a clean empty
- * state today; the query + table below are complete and light up the moment
- * `ratings` gains profile rows for a game.
+ * Player (profile_id) rows in `ratings` are populated by a mirror step in
+ * `apply_match_result()` / `advance_bracket_match()`: on a confirmed scrim
+ * or bracket match, the team's rating is copied onto every current roster
+ * member's row for that game. Renders a clean empty state until a game's
+ * first confirmed match.
  */
 export async function PlayerBoard({ game, sort, region, school }: Props) {
   const rows = await getPlayerRows(game, { region, school, sort });
