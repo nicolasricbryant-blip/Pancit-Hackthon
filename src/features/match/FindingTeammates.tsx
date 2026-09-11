@@ -12,6 +12,11 @@ interface Props {
   game: GameId;
   viewerId: string | null;
   isHost: boolean;
+  /** True only when THIS /match search is what turned auto-join on for this
+   *  game — see FindMatchLauncher's `startedAutojoinHere`. Gates whether
+   *  cancel() also disables the pref; false leaves a pre-existing, deliberate
+   *  /profile opt-in completely untouched. */
+  ownsAutojoin: boolean;
 }
 
 function initials(name: string): string {
@@ -33,8 +38,22 @@ function fmtElapsed(sec: number): string {
  * server and hands this component a fresh `lobby` prop — the orbit re-renders
  * with whoever the backend matchmaker just added, without losing the local
  * elapsed-time state below.
+ *
+ * Cancelling only closes/leaves THIS lobby by itself — `enable_autojoin` (run
+ * by FindMatchLauncher to get here) sets `lobby_autojoin_prefs.enabled = true`
+ * permanently, so without also turning that off, the caller keeps getting
+ * pulled into random open lobbies by the background matchmaker long after
+ * they stopped looking. `cancel()` below turns it back off too, but ONLY when
+ * `ownsAutojoin` says this exact search is what turned it on — never a
+ * pre-existing, deliberate /profile opt-in.
  */
-export function FindingTeammates({ lobby, game, viewerId, isHost }: Props) {
+export function FindingTeammates({
+  lobby,
+  game,
+  viewerId,
+  isHost,
+  ownsAutojoin,
+}: Props) {
   const router = useRouter();
   const [elapsed, setElapsed] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -92,7 +111,7 @@ export function FindingTeammates({ lobby, game, viewerId, isHost }: Props) {
     setError(null);
     const supabase = createClient();
 
-    const { error: e } = isHost
+    const { error: leaveErr } = isHost
       ? await supabase
           .from("lobbies")
           .update({ status: "closed" })
@@ -103,11 +122,35 @@ export function FindingTeammates({ lobby, game, viewerId, isHost }: Props) {
           .eq("lobby_id", lobby.id)
           .eq("profile_id", viewerId);
 
-    setBusy(false);
-    if (e) {
-      setError(e.message);
+    if (leaveErr) {
+      setBusy(false);
+      setError(leaveErr.message);
       return;
     }
+
+    if (ownsAutojoin) {
+      // Same owner-scoped write AutoJoinControl.turnOff performs on /profile.
+      // `.update().eq()` returns `error: null` even when zero rows matched, so
+      // verify a row actually came back (Commit 1's rule) rather than assume
+      // the background search actually stopped.
+      const { data, error: prefErr } = await supabase
+        .from("lobby_autojoin_prefs")
+        .update({ enabled: false })
+        .eq("profile_id", viewerId)
+        .eq("game_id", lobby.game)
+        .select("profile_id")
+        .maybeSingle();
+      if (prefErr || !data) {
+        setBusy(false);
+        setError(
+          prefErr?.message ??
+            "Left the lobby, but couldn't turn off auto-join — turn it off from Profile.",
+        );
+        return;
+      }
+    }
+
+    setBusy(false);
     router.push(`/match?game=${game}`);
   }
 
