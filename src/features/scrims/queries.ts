@@ -15,6 +15,19 @@ function one<T>(v: T[] | T | null | undefined): T | null {
   return v ?? null;
 }
 
+/**
+ * Today's calendar date in Asia/Manila (a fixed UTC+8, no DST) as "YYYY-MM-DD".
+ * `exam_mode_until` is a `date` column compared against this string — plain
+ * lexicographic comparison is correct for same-format ISO dates. Mirrors the
+ * +08:00 convention in `manilaLocalToIso` (features/events/actions.ts), just
+ * run the other way: instant "now" -> the PH calendar date it falls on. Using
+ * the server's UTC "today" instead would expire the pause up to 8 hours early
+ * for PH users (server midnight UTC is 8am in Manila).
+ */
+function manilaToday(): string {
+  return new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 /** Bucket a free-text availability label into the Time Window filter values. */
 function toTimeWindow(label: string | null): Exclude<TimeWindow, "Custom"> {
   const s = (label ?? "").toLowerCase();
@@ -45,6 +58,16 @@ function toFormat(raw: string): ScrimFormat {
  * Also resolves the viewer's Request Scrim eligibility (`requestState`) per
  * listing — two more lookups (the team they handle in this game, and that
  * team's existing scrim_requests), not one query per card.
+ *
+ * Exam-week pause: a listing is dropped from this feed when its team's
+ * handler currently has `profiles.exam_mode` on — meaning `exam_mode = true`
+ * AND (`exam_mode_until` is null, i.e. indefinite, OR still >= today in
+ * Manila). Resolved with one extra batched `profiles` lookup keyed by the
+ * listings' teams' handler ids, matching the existing ratings/reliability
+ * batching here — never a per-listing query. This only hides listings from
+ * this public finder feed; there is currently no "my listings" surface
+ * anywhere in the app (listings can only be created via seed data today), so
+ * a handler loses no existing visibility into their own paused listing.
  */
 export async function listScrimsForGame(game: GameId): Promise<ScrimListing[]> {
   const supabase = await createClient();
@@ -53,7 +76,7 @@ export async function listScrimsForGame(game: GameId): Promise<ScrimListing[]> {
     supabase
       .from("scrim_listings")
       .select(
-        "id,game_id,format,window_label,rank_band_label,rank_min,rank_max,team_id,teams(name,tag,region,school_id,schools(name,short_name))",
+        "id,game_id,format,window_label,rank_band_label,rank_min,rank_max,team_id,teams(name,tag,region,school_id,handler_id,schools(name,short_name))",
       )
       .eq("game_id", game)
       .eq("status", "open")
@@ -64,6 +87,29 @@ export async function listScrimsForGame(game: GameId): Promise<ScrimListing[]> {
   if (error || !data) return [];
 
   const teamIds = [...new Set(data.map((r) => r.team_id).filter(Boolean))];
+
+  // Handler ids currently pausing listings via exam mode, resolved from the
+  // handlers of just the teams behind these listings.
+  const handlerIdByTeam = new Map<string, string>();
+  for (const row of data) {
+    const team = one(row.teams);
+    if (team?.handler_id) handlerIdByTeam.set(row.team_id, team.handler_id);
+  }
+  const pausedHandlerIds = new Set<string>();
+  const handlerIds = [...new Set(handlerIdByTeam.values())];
+  if (handlerIds.length > 0) {
+    const today = manilaToday();
+    const { data: examRows } = await supabase
+      .from("profiles")
+      .select("id,exam_mode,exam_mode_until")
+      .in("id", handlerIds)
+      .eq("exam_mode", true);
+    for (const p of examRows ?? []) {
+      if (!p.exam_mode_until || p.exam_mode_until >= today) {
+        pausedHandlerIds.add(p.id);
+      }
+    }
+  }
 
   const ratingByTeam = new Map<string, number>();
   const reliabilityByTeam = new Map<string, number>();
@@ -124,7 +170,15 @@ export async function listScrimsForGame(game: GameId): Promise<ScrimListing[]> {
     return "can-request";
   }
 
-  return data.map((row): ScrimListing => {
+  const visible =
+    pausedHandlerIds.size === 0
+      ? data
+      : data.filter((row) => {
+          const handlerId = handlerIdByTeam.get(row.team_id);
+          return !handlerId || !pausedHandlerIds.has(handlerId);
+        });
+
+  return visible.map((row): ScrimListing => {
     const team = one(row.teams);
     const school = one(team?.schools);
     const rankTiers = [row.rank_min, row.rank_max].filter(
