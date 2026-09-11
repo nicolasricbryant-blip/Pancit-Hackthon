@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser, requireProfile } from "@/features/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { GAMES } from "@/features/games/config";
+import { GAMES, coerceGameId, getGame } from "@/features/games/config";
 import { AvatarUpload } from "@/features/profile/AvatarUpload";
 import { ProfileTabs } from "@/features/profile/ProfileTabs";
 import { GameProfileCard } from "@/features/profile/GameProfileCard";
@@ -114,11 +114,24 @@ export default async function ProfilePage() {
   // Summed across games for this overview tile row.
   const { data: statRows } = await supabase
     .from("player_match_stats")
-    .select("scrims, wins")
+    .select("game_id, scrims, wins")
     .eq("profile_id", profile.id);
 
   const totalScrims = (statRows ?? []).reduce((n, r) => n + (r.scrims ?? 0), 0);
   const totalWins = (statRows ?? []).reduce((n, r) => n + (r.wins ?? 0), 0);
+
+  // "Main game" — the title with the most played scrims; falls back to a
+  // verified game profile, then just the first supported game, so the badge
+  // always has something to show.
+  const mostPlayedGameId = [...(statRows ?? [])].sort(
+    (a, b) => (b.scrims ?? 0) - (a.scrims ?? 0),
+  )[0]?.game_id;
+  const verifiedGameId = [...gpByGame.entries()].find(
+    ([, gp]) => gp.verification_status === "verified",
+  )?.[0];
+  const mainGame = getGame(
+    coerceGameId(mostPlayedGameId ?? verifiedGameId ?? GAMES[0].id),
+  );
 
   const stats: { label: string; value: string }[] = [
     { label: "Scrims", value: totalScrims > 0 ? String(totalScrims) : "—" },
@@ -230,8 +243,13 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      <Link href="/settings" className={styles.ctaBtn}>
-        Edit Profile
+      <Link
+        href={`/?game=${mainGame.id}`}
+        className={styles.mainGameBtn}
+        style={{ "--slot-hue": `var(${mainGame.hueToken})` } as React.CSSProperties}
+      >
+        <span className={styles.mainGameKicker}>Main Game</span>
+        <span className={styles.mainGameValue}>{mainGame.label}</span>
       </Link>
 
       <div className={styles.slotBlock}>

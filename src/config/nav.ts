@@ -34,11 +34,19 @@ export const ROUTES = {
   signUp: "/sign-up",
   onboarding: "/onboarding",
   settings: "/settings",
+  notifications: "/notifications",
+  help: "/help",
 } as const;
 
+/**
+ * Declaration order here drives the order things appear on `/more` (after
+ * TAB_HREFS strips whatever is already a tab). Notifications first, Settings
+ * + Help & Support last — everything else in between.
+ */
 export const PRIMARY_NAV: NavItem[] = [
   { href: ROUTES.scrims, label: "Scrims", gameScoped: true },
   { href: ROUTES.match, label: "Find Match", gameScoped: true },
+  { href: ROUTES.notifications, label: "Notifications", gameScoped: false },
   { href: ROUTES.leaderboards, label: "Leaderboards", gameScoped: true },
   { href: ROUTES.lobbies, label: "Lobbies", gameScoped: true },
   { href: ROUTES.events, label: "Events", gameScoped: true },
@@ -50,6 +58,8 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: ROUTES.matches, label: "Match Room", roles: ["handler", "admin"], gameScoped: true },
   { href: ROUTES.rank, label: "My Rank", roles: ["player", "admin"], gameScoped: true },
   { href: ROUTES.rankReview, label: "Review Queue", roles: ["admin"], gameScoped: false },
+  { href: ROUTES.settings, label: "Settings", gameScoped: false },
+  { href: ROUTES.help, label: "Help & Support", gameScoped: false },
 ];
 
 /**
