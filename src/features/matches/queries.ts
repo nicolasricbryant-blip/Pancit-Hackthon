@@ -69,6 +69,18 @@ export async function getMyTeamIds(profileId: string): Promise<string[]> {
   return [...ids];
 }
 
+/**
+ * Team ids the profile is the HANDLER of — narrower than getMyTeamIds, which
+ * also includes teams they merely roster on. Incoming scrim requests can only
+ * be accepted/declined by a handler (scrim_requests_update_party RLS), so
+ * that section needs this set, not the mixed one.
+ */
+export async function getHandledTeamIds(profileId: string): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("teams").select("id").eq("handler_id", profileId);
+  return (data ?? []).map((r) => r.id);
+}
+
 export interface MatchesForProfile {
   groups: MatchGroups;
   total: number;

@@ -1248,6 +1248,100 @@ export type Database = {
           },
         ]
       }
+      // HAND-ADDED — not yet in the live schema this file is generated from.
+      // Migration: supabase/migrations/20260911010018_scrim_requests.sql.
+      // Re-generate this file against the live schema once that migration is
+      // applied, and drop this comment (the shape below should then match
+      // byte-for-byte, since it was written to mirror the generator's own
+      // formatting for mentorship_requests).
+      scrim_requests: {
+        Row: {
+          created_at: string
+          from_team: string
+          id: string
+          listing_id: string
+          match_id: string | null
+          message: string | null
+          responded_at: string | null
+          responded_by: string | null
+          requested_by: string
+          status: string
+          to_team: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_team: string
+          id?: string
+          listing_id: string
+          match_id?: string | null
+          message?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          requested_by: string
+          status?: string
+          to_team: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_team?: string
+          id?: string
+          listing_id?: string
+          match_id?: string | null
+          message?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          requested_by?: string
+          status?: string
+          to_team?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrim_requests_from_team_fkey"
+            columns: ["from_team"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scrim_requests_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "scrim_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scrim_requests_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "scrim_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scrim_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scrim_requests_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scrim_requests_to_team_fkey"
+            columns: ["to_team"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           id: string
@@ -1553,6 +1647,8 @@ export type Database = {
     }
     Functions: {
       accept_mentorship: { Args: { p_id: string }; Returns: undefined }
+      // HAND-ADDED — see the scrim_requests table comment above.
+      accept_scrim_request: { Args: { p_id: string }; Returns: string }
       advance_bracket_match: {
         Args: { p_match: string; p_score_a: number; p_score_b: number }
         Returns: undefined

@@ -66,7 +66,11 @@ export function ScrimCard({ listing }: { listing: ScrimListing }) {
       </div>
 
       <div className="card-action">
-        <RequestScrimButton teamName={listing.teamName} />
+        <RequestScrimButton
+          listingId={listing.id}
+          teamName={listing.teamName}
+          requestState={listing.requestState}
+        />
       </div>
     </article>
   );
