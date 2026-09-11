@@ -42,6 +42,11 @@ export default async function EventDetailPage({
   const canManage = isHost || isAdmin(profile);
   const game = detail.event.game_id ?? "mlbb";
   const justCheckedIn = sp.checkedin === "1";
+  // Set by the checkin route (route.ts) on a failed scan — a wrong/expired
+  // code, or scanning without an RSVP of "going" — so the page can show a
+  // real error instead of looking like the tap did nothing.
+  const checkinError: "err" | "notgoing" | null =
+    sp.checkin === "err" ? "err" : sp.checkin === "notgoing" ? "notgoing" : null;
 
   const scopeStyle = {
     "--game-current": `var(--game-${game})`,
@@ -55,6 +60,7 @@ export default async function EventDetailPage({
         canManage={canManage}
         isAuthed={!!profile}
         justCheckedIn={justCheckedIn}
+        checkinError={checkinError}
       />
     </div>
   );

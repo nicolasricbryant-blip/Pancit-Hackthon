@@ -15,11 +15,13 @@ export function EventDetailView({
   canManage,
   isAuthed,
   justCheckedIn,
+  checkinError,
 }: {
   detail: EventDetail;
   canManage: boolean;
   isAuthed: boolean;
   justCheckedIn: boolean;
+  checkinError: "err" | "notgoing" | null;
 }) {
   const {
     event,
@@ -144,20 +146,33 @@ export function EventDetailView({
           <HostCheckin code={event.checkin_code} eventId={event.id} />
         )}
 
-        {!canManage && viewerStatus === "going" && (
+        {/* `checkinError` (a failed scan — see checkin/route.ts) can be true
+            even when the viewer isn't currently RSVP'd "going" (that's exactly
+            what the "notgoing" reason means), so it's rendered independently
+            of the `viewerStatus === "going"` gate that controls the
+            checked-in / pending indicator. */}
+        {!canManage && (viewerStatus === "going" || checkinError) && (
           <div className={styles.infoBlock}>
             <span className={styles.infoLabel}>Check-in</span>
-            {viewerCheckedInAt || justCheckedIn ? (
-              <span className={styles.checkedIn}>
-                Checked in ✓
-                {viewerCheckedInAt
-                  ? ` · ${relativeTime(viewerCheckedInAt)}`
-                  : ""}
-              </span>
-            ) : (
-              <span className={styles.checkinPending}>
-                You check in on-site — scan the host&apos;s QR when you arrive.
-              </span>
+            {viewerStatus === "going" &&
+              (viewerCheckedInAt || justCheckedIn ? (
+                <span className={styles.checkedIn}>
+                  Checked in ✓
+                  {viewerCheckedInAt
+                    ? ` · ${relativeTime(viewerCheckedInAt)}`
+                    : ""}
+                </span>
+              ) : (
+                <span className={styles.checkinPending}>
+                  You check in on-site — scan the host&apos;s QR when you arrive.
+                </span>
+              ))}
+            {checkinError && (
+              <p className={styles.checkinError} role="alert">
+                {checkinError === "notgoing"
+                  ? 'You need to RSVP "Going" before checking in.'
+                  : "That check-in code is invalid or expired."}
+              </p>
             )}
           </div>
         )}

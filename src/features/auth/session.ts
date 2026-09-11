@@ -40,11 +40,26 @@ export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
  * Require a signed-in profile. Redirects to `/sign-in?next=…` when signed out.
  * When `next` is omitted the caller-side redirect target is lost, so pass the
  * current path from the page when you can.
+ *
+ * A null `getCurrentProfile()` result is ambiguous — signed out, or signed in
+ * with no `profiles` row at all (predates the `handle_new_user` trigger, or
+ * the row was never created) — and the two need different redirects. Sending
+ * the second case to `/sign-in` is a bug: `/sign-in` immediately redirects a
+ * signed-in user back to `next`, which is this same page, so a profile-less
+ * user ping-pongs `/sign-in` <-> `next` forever (ERR_TOO_MANY_REDIRECTS).
+ * `/onboarding` upserts a `profiles` row on submit (see OnboardingForm), so
+ * it's the one place that actually gets such an account unstuck.
  */
 export async function requireProfile(next?: string): Promise<Profile> {
   const profile = await getCurrentProfile();
   if (!profile) {
-    redirect(next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in");
+    const user = await getUser();
+    if (!user) {
+      redirect(next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in");
+    }
+    // `next === "/onboarding"` would only happen if the onboarding page ever
+    // called requireProfile itself — guard against that looping on /onboarding.
+    redirect(next === "/onboarding" ? "/" : "/onboarding");
   }
   return profile;
 }

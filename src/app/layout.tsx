@@ -61,6 +61,13 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const profile = await getCurrentProfile();
   const roles = navRoles(profile);
+  // First-run onboarding trap (proxy.ts) sends any authed, un-onboarded user
+  // back to /onboarding no matter what they tap — so the tab bar / rail and
+  // game switcher would be dead controls if shown here. Suppress them (and
+  // reduce the header to a non-navigating form) while the gate is active;
+  // `onboarding-gate` on <body> lets globals.css collapse the layout gutters
+  // that assume the tab bar / rail is actually on screen.
+  const onboardingGate = profile != null && !profile.onboarded;
 
   return (
     <html
@@ -87,16 +94,20 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body>
+      <body className={onboardingGate ? "onboarding-gate" : undefined}>
         <AuthProvider profile={profile}>
-          <AppHeader />
-          <Suspense fallback={<div className="game-band" aria-hidden />}>
-            <GameBand />
-          </Suspense>
+          <AppHeader restricted={onboardingGate} />
+          {!onboardingGate && (
+            <Suspense fallback={<div className="game-band" aria-hidden />}>
+              <GameBand />
+            </Suspense>
+          )}
           <main>{children}</main>
-          <Suspense fallback={<nav className="app-tabbar" aria-hidden />}>
-            <AppNav roles={roles} />
-          </Suspense>
+          {!onboardingGate && (
+            <Suspense fallback={<nav className="app-tabbar" aria-hidden />}>
+              <AppNav roles={roles} />
+            </Suspense>
+          )}
         </AuthProvider>
         <ServiceWorkerRegister />
         <NativeFeelGuard />

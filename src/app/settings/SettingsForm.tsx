@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  choiceFromRoles,
+  rolesFromChoice,
+  type RoleChoice,
+} from "@/features/auth/types";
 import styles from "./settings.module.css";
 
 interface Props {
@@ -10,13 +15,21 @@ interface Props {
   initialRegion: string;
   initialExamMode: boolean;
   initialExamModeUntil: string | null;
+  initialRoles: string[];
 }
+
+const ROLE_OPTIONS: { value: RoleChoice; name: string; desc: string }[] = [
+  { value: "player", name: "Player", desc: "Ranks, teams, browse and request scrims." },
+  { value: "handler", name: "Team Handler", desc: "Run a roster, post listings, report results." },
+  { value: "both", name: "Both — player-captain", desc: "Play and run your own team." },
+];
 
 export function SettingsForm({
   initialDisplayName,
   initialRegion,
   initialExamMode,
   initialExamModeUntil,
+  initialRoles,
 }: Props) {
   const router = useRouter();
 
@@ -24,6 +37,7 @@ export function SettingsForm({
   const [region, setRegion] = useState(initialRegion);
   const [examMode, setExamMode] = useState(initialExamMode);
   const [examUntil, setExamUntil] = useState(initialExamModeUntil ?? "");
+  const [role, setRole] = useState<RoleChoice>(choiceFromRoles(initialRoles));
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -50,6 +64,13 @@ export function SettingsForm({
       return;
     }
 
+    // `admin` is never self-assignable — rolesFromChoice() only ever produces
+    // player/handler, so re-append admin here rather than let a settings save
+    // silently drop it from an admin's account.
+    const roles = initialRoles.includes("admin")
+      ? [...rolesFromChoice(role), "admin"]
+      : rolesFromChoice(role);
+
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -57,6 +78,7 @@ export function SettingsForm({
         region: region.trim() || null,
         exam_mode: examMode,
         exam_mode_until: examMode && examUntil ? examUntil : null,
+        roles,
       })
       .eq("id", user.id);
 
@@ -122,6 +144,35 @@ export function SettingsForm({
             placeholder="e.g. NCR"
             disabled={submitting}
           />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Role</h2>
+
+        <div className={styles.field}>
+          <div className={styles.roleGroup} role="radiogroup" aria-label="Role">
+            {ROLE_OPTIONS.map((opt) => (
+              <label key={opt.value} className={styles.roleCard}>
+                <input
+                  type="radio"
+                  name="set-role"
+                  value={opt.value}
+                  checked={role === opt.value}
+                  onChange={() => setRole(opt.value)}
+                  disabled={submitting}
+                />
+                <span className={styles.roleText}>
+                  <span className={styles.roleName}>{opt.name}</span>
+                  <span className={styles.roleDesc}>{opt.desc}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          <span className={styles.hint}>
+            Switching to Team Handler (or Both) unlocks creating and running a
+            team.
+          </span>
         </div>
       </section>
 

@@ -365,6 +365,23 @@ main {
   }
 }
 
+/* Onboarding gate (see RootLayout): the tab bar / rail and game band are not
+   rendered at all while it's active, so collapse the gutters and rail divider
+   that assume they're on screen — otherwise the setup screen keeps a blank
+   strip (mobile) or a floating vertical rule (desktop) for controls that
+   aren't there. */
+body.onboarding-gate main {
+  padding-bottom: 0;
+}
+@media (min-width: 768px) {
+  body.onboarding-gate main {
+    margin-left: 0;
+  }
+  body.onboarding-gate .app-header::after {
+    content: none;
+  }
+}
+
 .feed-scope {
   display: block;
 }

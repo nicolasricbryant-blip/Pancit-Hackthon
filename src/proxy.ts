@@ -10,7 +10,15 @@ import type { Database } from "@/lib/db/types";
  */
 
 /** Auth-required path prefixes. Everything else the matcher hits is public. */
-const AUTH_PREFIXES = ["/onboarding", "/settings", "/rank", "/matches", "/mentorship"];
+const AUTH_PREFIXES = [
+  "/onboarding",
+  "/settings",
+  "/rank",
+  "/matches",
+  "/mentorship",
+  "/profile",
+  "/notifications",
+];
 
 /** Auth-required patterns under otherwise-public browse routes. */
 const AUTH_PATTERNS = [
@@ -72,6 +80,11 @@ export async function proxy(request: NextRequest) {
   // 2 · first-run trap: authed but setup not finished → force onboarding.
   //     Keyed on `profiles.onboarded`, NOT school_id — school is optional now, so
   //     a tester on a non-.edu.ph address can finish without picking one.
+  //     A *missing* `profiles` row (predates the handle_new_user trigger, or
+  //     was never created) is treated the same as `onboarded === false`:
+  //     /onboarding's submit upserts the row, so it's the only path that gets
+  //     such an account unstuck — requireProfile() mirrors this for the same
+  //     reason (see session.ts).
   //     Exempt /onboarding itself and the sign-out route so the user isn't stuck.
   if (
     user &&
@@ -84,7 +97,7 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile && !profile.onboarded) {
+    if (!profile || !profile.onboarded) {
       const onboarding = request.nextUrl.clone();
       onboarding.pathname = "/onboarding";
       onboarding.search = "";

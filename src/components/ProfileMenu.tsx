@@ -19,9 +19,20 @@ function initials(name: string): string {
 
 /**
  * Header profile control. Authed → initials button that opens a dropdown
- * (My Profile, Sign out). Anon → a "Sign in" link.
+ * (My Profile, Settings, Sign out). Anon → a "Sign in" link.
+ *
+ * `restricted` (set while the onboarding gate is active — see AppHeader) drops
+ * "My Profile" and "Settings" from the dropdown: both routes just 307 back to
+ * /onboarding, so offering them is a dead tap. Sign out stays — it's the exempt
+ * escape hatch — and so does the profile head, which is just static text.
  */
-export function ProfileMenu({ user }: { user: ProfileMenuUser | null }) {
+export function ProfileMenu({
+  user,
+  restricted = false,
+}: {
+  user: ProfileMenuUser | null;
+  restricted?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -78,23 +89,27 @@ export function ProfileMenu({ user }: { user: ProfileMenuUser | null }) {
             )}
           </div>
 
-          <Link
-            href="/profile"
-            role="menuitem"
-            className={styles.item}
-            onClick={() => setOpen(false)}
-          >
-            My Profile
-          </Link>
+          {!restricted && (
+            <>
+              <Link
+                href="/profile"
+                role="menuitem"
+                className={styles.item}
+                onClick={() => setOpen(false)}
+              >
+                My Profile
+              </Link>
 
-          <Link
-            href="/settings"
-            role="menuitem"
-            className={styles.item}
-            onClick={() => setOpen(false)}
-          >
-            Settings
-          </Link>
+              <Link
+                href="/settings"
+                role="menuitem"
+                className={styles.item}
+                onClick={() => setOpen(false)}
+              >
+                Settings
+              </Link>
+            </>
+          )}
 
           <form
             action="/auth/sign-out"
