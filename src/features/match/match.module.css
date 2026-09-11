@@ -1,0 +1,327 @@
+/* ============================================================================
+   MATCH — "Find Teammates" launcher + the live searching screen. Tokens only.
+   ========================================================================== */
+
+.launcherWrap {
+  max-width: 460px;
+  margin-inline: auto;
+  padding: var(--space-lg) var(--space-md) var(--space-3xl);
+}
+
+.launcherCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+.launcherTitle {
+  margin: 0;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.launcherSub {
+  margin: calc(-1 * var(--space-sm)) 0 0;
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+.fieldLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.chip {
+  appearance: none;
+  min-height: 40px;
+  padding: var(--space-2xs) var(--space-md);
+  background: var(--color-surface-2);
+  color: var(--color-ink-dim);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.chip:hover {
+  color: var(--color-ink);
+}
+.chip[aria-checked="true"] {
+  color: var(--color-primary-ink);
+  background: var(--color-primary);
+  border-color: transparent;
+}
+.chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rankRow {
+  display: flex;
+  gap: var(--space-sm);
+}
+@media (max-width: 359px) {
+  .rankRow {
+    flex-direction: column;
+  }
+}
+.select {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  background: var(--color-surface-1)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a8f99' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")
+    no-repeat right var(--space-sm) center;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 0 calc(var(--space-md) + 12px) 0 var(--space-sm);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.select:hover {
+  border-color: var(--color-ink-mute);
+}
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.micRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.micRow input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.hint {
+  margin: 0;
+  padding: var(--space-sm);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-ink-dim);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+}
+.hintLink {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.findBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: var(--space-sm) var(--space-lg);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--text-base);
+  letter-spacing: 0.01em;
+  color: var(--color-primary-ink);
+  background: var(--color-primary);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.findBtn:hover {
+  background: var(--color-primary-hi);
+}
+.findBtn:active {
+  transform: translateY(1px);
+}
+.findBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.findBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.err {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+/* ============================================================================
+   SEARCHING SCREEN — the orbiting-avatar "Finding Teammates" state.
+   ========================================================================== */
+.searchWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  max-width: 420px;
+  margin-inline: auto;
+  padding: var(--space-2xl) var(--space-md) var(--space-3xl);
+  text-align: center;
+}
+.searchTitle {
+  margin: 0;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.searchSub {
+  margin: 0 0 var(--space-md);
+  color: var(--color-ink-dim);
+  font-size: var(--text-sm);
+}
+
+.orbit {
+  position: relative;
+  flex: 0 0 auto;
+  margin: var(--space-sm) 0;
+}
+.orbitRingOuter,
+.orbitRingInner {
+  position: absolute;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-line);
+}
+.orbitRingOuter {
+  inset: 0;
+}
+.orbitRingInner {
+  inset: 36px;
+  border-color: color-mix(in oklch, var(--game-current) 30%, var(--color-line));
+  background: var(--game-current-dim);
+}
+.orbitSlot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-surface-1);
+  border: 2px solid var(--color-surface-1);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-mid) var(--ease-out);
+}
+.orbitSlot[data-pending="true"] {
+  border-color: var(--color-warn);
+  animation: match-pulse 1.4s ease-in-out infinite;
+}
+@keyframes match-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-warn) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in oklch, var(--color-warn) 18%, transparent);
+  }
+}
+.orbitAvatarImg {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;
+}
+.orbitAvatarMono {
+  font-family: var(--font-display), ui-monospace, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--game-current);
+}
+.orbitEmpty {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  border: 1.5px dashed var(--color-line);
+  background: var(--color-surface-2);
+}
+
+.timer {
+  margin: var(--space-sm) 0 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--text-3xl);
+  color: var(--color-ink);
+}
+.status {
+  margin: 0 0 var(--space-md);
+  color: var(--color-ink-mute);
+  font-size: var(--text-sm);
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 160px;
+  padding: 0 var(--space-xl);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: transparent;
+  border: 1.5px solid var(--color-line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.cancelBtn:hover {
+  border-color: var(--color-ink-mute);
+  background: var(--color-surface-2);
+}
+.cancelBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

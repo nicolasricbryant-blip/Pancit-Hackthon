@@ -67,7 +67,22 @@ function TabIcon({ label }: { label: string }) {
 }
 
 const ICON_PATHS: Record<string, React.ReactNode> = {
-  // lightning bolt
+  // house
+  Home: (
+    <>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" />
+    </>
+  ),
+  // crosshair / target — matchmaking
+  Match: (
+    <>
+      <circle cx="12" cy="12" r="7" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+    </>
+  ),
+  // lightning bolt (still used by the "Scrims" entry inside More)
   Scrims: <path d="M13 2 4 14h7l-1 8 10-12h-7l1-8Z" />,
   // three ascending bars
   Ladder: <path d="M5 20v-4M12 20v-9M19 20V6" />,

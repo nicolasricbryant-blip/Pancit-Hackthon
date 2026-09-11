@@ -3,10 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser, requireProfile } from "@/features/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { GAMES } from "@/features/games/config";
+import { GAMES, coerceGameId, getGame } from "@/features/games/config";
 import { AvatarUpload } from "@/features/profile/AvatarUpload";
 import { ProfileTabs } from "@/features/profile/ProfileTabs";
 import { GameProfileCard } from "@/features/profile/GameProfileCard";
+import { GameSlotRow, type SlotStatus } from "@/features/profile/GameSlotRow";
 import styles from "./profile.module.css";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -47,6 +48,24 @@ function VerifiedCheck() {
         />
       </svg>
     </span>
+  );
+}
+
+function SettingsGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.9-1.5-2-3.4-2.3.6a7.6 7.6 0 0 0-2.6-1.5L14 2h-4l-.4 2.3a7.6 7.6 0 0 0-2.6 1.5l-2.3-.6-2 3.4L4.6 10a7.4 7.4 0 0 0 0 3l-1.9 1.5 2 3.4 2.3-.6a7.6 7.6 0 0 0 2.6 1.5L10 22h4l.4-2.3a7.6 7.6 0 0 0 2.6-1.5l2.3.6 2-3.4-1.9-1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -95,11 +114,24 @@ export default async function ProfilePage() {
   // Summed across games for this overview tile row.
   const { data: statRows } = await supabase
     .from("player_match_stats")
-    .select("scrims, wins")
+    .select("game_id, scrims, wins")
     .eq("profile_id", profile.id);
 
   const totalScrims = (statRows ?? []).reduce((n, r) => n + (r.scrims ?? 0), 0);
   const totalWins = (statRows ?? []).reduce((n, r) => n + (r.wins ?? 0), 0);
+
+  // "Main game" — the title with the most played scrims; falls back to a
+  // verified game profile, then just the first supported game, so the badge
+  // always has something to show.
+  const mostPlayedGameId = [...(statRows ?? [])].sort(
+    (a, b) => (b.scrims ?? 0) - (a.scrims ?? 0),
+  )[0]?.game_id;
+  const verifiedGameId = [...gpByGame.entries()].find(
+    ([, gp]) => gp.verification_status === "verified",
+  )?.[0];
+  const mainGame = getGame(
+    coerceGameId(mostPlayedGameId ?? verifiedGameId ?? GAMES[0].id),
+  );
 
   const stats: { label: string; value: string }[] = [
     { label: "Scrims", value: totalScrims > 0 ? String(totalScrims) : "—" },
@@ -112,6 +144,18 @@ export default async function ProfilePage() {
           : "—",
     },
   ];
+
+  const slots = GAMES.slice(0, 3).map((g) => {
+    const status = gpByGame.get(g.id)?.verification_status;
+    return {
+      game: g,
+      status: (status === "verified" ||
+      status === "pending" ||
+      status === "rejected"
+        ? status
+        : "unverified") as SlotStatus,
+    };
+  });
 
   const gamePanel = (
     <div className={styles.gameList}>
@@ -167,6 +211,17 @@ export default async function ProfilePage() {
 
   return (
     <div className={styles.wrap}>
+      <div className={styles.pageHead}>
+        <h1 className={styles.pageTitle}>Profile</h1>
+        <Link
+          href="/settings"
+          className={styles.settingsLink}
+          aria-label="Settings"
+        >
+          <SettingsGlyph />
+        </Link>
+      </div>
+
       <section className={styles.identity}>
         <AvatarUpload
           userId={user.id}
@@ -176,7 +231,7 @@ export default async function ProfilePage() {
 
         <div className={styles.idCol}>
           <div className={styles.nameRow}>
-            <h1 className={styles.name}>{displayName}</h1>
+            <h2 className={styles.name}>{displayName}</h2>
             {profile.school_verified && <VerifiedCheck />}
           </div>
           <div className={styles.idMeta}>
@@ -187,6 +242,22 @@ export default async function ProfilePage() {
           </div>
         </div>
       </section>
+
+      <Link
+        href={`/?game=${mainGame.id}`}
+        className={styles.mainGameBtn}
+        style={{ "--slot-hue": `var(${mainGame.hueToken})` } as React.CSSProperties}
+      >
+        <span className={styles.mainGameKicker}>Main Game</span>
+        <span className={styles.mainGameValue}>{mainGame.label}</span>
+      </Link>
+
+      <div className={styles.slotBlock}>
+        <GameSlotRow slots={slots} />
+        <Link href="/rank/submit" className={styles.addGameBtn}>
+          + Add / Verify Another Game
+        </Link>
+      </div>
 
       <div className={styles.identBlock}>
         <div className={styles.chips}>
