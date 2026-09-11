@@ -139,6 +139,8 @@ export function EventDetailView({
             eventId={event.id}
             initialStatus={viewerStatus}
             isAuthed={isAuthed}
+            goingCount={goingCount}
+            capacity={capacity}
           />
         </div>
 
