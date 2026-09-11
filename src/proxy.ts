@@ -91,13 +91,21 @@ export async function proxy(request: NextRequest) {
     pathname !== "/onboarding" &&
     !pathname.startsWith("/auth/")
   ) {
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("onboarded")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (!profile || !profile.onboarded) {
+    // Fail OPEN on a failed read. `maybeSingle()` returns `data: null` for
+    // both "no such row" and "the query errored" — those need opposite
+    // handling here. The proxy runs on *every* request, so treating a
+    // transient Supabase hiccup as "not onboarded" would bounce every
+    // signed-in user in the app to /onboarding, telling them to set up a
+    // profile they already have, until the hiccup passes. Do NOT simplify
+    // this back to `!profile || !profile.onboarded` — that reintroduces
+    // exactly that failure mode.
+    if (!profileError && (!profile || !profile.onboarded)) {
       const onboarding = request.nextUrl.clone();
       onboarding.pathname = "/onboarding";
       onboarding.search = "";

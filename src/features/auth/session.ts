@@ -57,9 +57,52 @@ export async function requireProfile(next?: string): Promise<Profile> {
     if (!user) {
       redirect(next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in");
     }
-    // `next === "/onboarding"` would only happen if the onboarding page ever
-    // called requireProfile itself — guard against that looping on /onboarding.
-    redirect(next === "/onboarding" ? "/" : "/onboarding");
+
+    // getCurrentProfile() swallows its own read error and returns null either
+    // way, so a null result here is ambiguous: no `profiles` row at all, or
+    // the read itself failed. The two need very different handling — a
+    // transient failure must never read as "no profile" and send someone with
+    // a perfectly good profile into onboarding. Re-check explicitly so a real
+    // query error surfaces as a real error (the route's error boundary),
+    // never as a silent redirect.
+    const supabase = await createClient();
+    const { data: row, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(
+        `requireProfile: could not verify a profile for ${user.id}: ${error.message}`,
+      );
+    }
+
+    if (!row) {
+      // The query succeeded and genuinely found no row (predates the
+      // handle_new_user trigger, or the row was never created). /onboarding
+      // upserts one on submit (see OnboardingForm) — the one place that gets
+      // such an account unstuck. `next === "/onboarding"` guards against a
+      // future caller invoking requireProfile from the onboarding page itself.
+      redirect(next === "/onboarding" ? "/" : "/onboarding");
+    }
+
+    // The row exists after all, so getCurrentProfile()'s own read must have
+    // hit a transient failure it swallowed — its cached null can't be retried
+    // within this render, so fetch the full row directly.
+    const { data: full, error: fullError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    if (fullError || !full) {
+      throw new Error(
+        `requireProfile: profile row exists for ${user.id} but could not be read: ${
+          fullError?.message ?? "unknown error"
+        }`,
+      );
+    }
+    return full;
   }
   return profile;
 }
