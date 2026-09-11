@@ -106,6 +106,7 @@ h3,
   padding-inline: var(--space-md);
   background: var(--color-surface-1);
   border-bottom: 1px solid var(--color-line);
+  box-shadow: 0 1px 0 oklch(20% 0.02 255 / 0.03), 0 4px 16px oklch(20% 0.03 255 / 0.05);
 }
 
 .wordmark {
@@ -204,6 +205,7 @@ h3,
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-surface-1);
   border-top: 1px solid var(--color-line);
+  box-shadow: 0 -1px 0 oklch(20% 0.02 255 / 0.03), 0 -4px 16px oklch(20% 0.03 255 / 0.05);
 }
 .app-tab {
   position: relative;
@@ -619,14 +621,17 @@ main {
   border: 1px solid var(--color-line);
   border-left: 3px solid var(--game-current);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
   transition:
     background var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 .scrim-card:hover {
   background: var(--color-surface-2);
   border-color: color-mix(in oklch, var(--game-current) 45%, var(--color-line));
   border-left-color: var(--game-current);
+  transform: translateY(-2px);
 }
 
 .card-head {

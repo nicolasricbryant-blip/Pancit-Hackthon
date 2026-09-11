@@ -7,6 +7,7 @@ import { GAMES } from "@/features/games/config";
 import { AvatarUpload } from "@/features/profile/AvatarUpload";
 import { ProfileTabs } from "@/features/profile/ProfileTabs";
 import { GameProfileCard } from "@/features/profile/GameProfileCard";
+import { GameSlotRow, type SlotStatus } from "@/features/profile/GameSlotRow";
 import styles from "./profile.module.css";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -47,6 +48,24 @@ function VerifiedCheck() {
         />
       </svg>
     </span>
+  );
+}
+
+function SettingsGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.9-1.5-2-3.4-2.3.6a7.6 7.6 0 0 0-2.6-1.5L14 2h-4l-.4 2.3a7.6 7.6 0 0 0-2.6 1.5l-2.3-.6-2 3.4L4.6 10a7.4 7.4 0 0 0 0 3l-1.9 1.5 2 3.4 2.3-.6a7.6 7.6 0 0 0 2.6 1.5L10 22h4l.4-2.3a7.6 7.6 0 0 0 2.6-1.5l2.3.6 2-3.4-1.9-1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -113,6 +132,18 @@ export default async function ProfilePage() {
     },
   ];
 
+  const slots = GAMES.slice(0, 3).map((g) => {
+    const status = gpByGame.get(g.id)?.verification_status;
+    return {
+      game: g,
+      status: (status === "verified" ||
+      status === "pending" ||
+      status === "rejected"
+        ? status
+        : "unverified") as SlotStatus,
+    };
+  });
+
   const gamePanel = (
     <div className={styles.gameList}>
       {GAMES.map((g) => (
@@ -167,6 +198,17 @@ export default async function ProfilePage() {
 
   return (
     <div className={styles.wrap}>
+      <div className={styles.pageHead}>
+        <h1 className={styles.pageTitle}>Profile</h1>
+        <Link
+          href="/settings"
+          className={styles.settingsLink}
+          aria-label="Settings"
+        >
+          <SettingsGlyph />
+        </Link>
+      </div>
+
       <section className={styles.identity}>
         <AvatarUpload
           userId={user.id}
@@ -176,7 +218,7 @@ export default async function ProfilePage() {
 
         <div className={styles.idCol}>
           <div className={styles.nameRow}>
-            <h1 className={styles.name}>{displayName}</h1>
+            <h2 className={styles.name}>{displayName}</h2>
             {profile.school_verified && <VerifiedCheck />}
           </div>
           <div className={styles.idMeta}>
@@ -187,6 +229,17 @@ export default async function ProfilePage() {
           </div>
         </div>
       </section>
+
+      <Link href="/settings" className={styles.ctaBtn}>
+        Edit Profile
+      </Link>
+
+      <div className={styles.slotBlock}>
+        <GameSlotRow slots={slots} />
+        <Link href="/rank/submit" className={styles.addGameBtn}>
+          + Add / Verify Another Game
+        </Link>
+      </div>
 
       <div className={styles.identBlock}>
         <div className={styles.chips}>

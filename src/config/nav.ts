@@ -19,6 +19,7 @@ export const ROUTES = {
   scrims: "/",
   leaderboards: "/leaderboards",
   lobbies: "/lobbies",
+  match: "/match",
   events: "/events",
   teams: "/teams",
   matches: "/matches",
@@ -37,6 +38,7 @@ export const ROUTES = {
 
 export const PRIMARY_NAV: NavItem[] = [
   { href: ROUTES.scrims, label: "Scrims", gameScoped: true },
+  { href: ROUTES.match, label: "Find Match", gameScoped: true },
   { href: ROUTES.leaderboards, label: "Leaderboards", gameScoped: true },
   { href: ROUTES.lobbies, label: "Lobbies", gameScoped: true },
   { href: ROUTES.events, label: "Events", gameScoped: true },
@@ -53,14 +55,13 @@ export const PRIMARY_NAV: NavItem[] = [
 /**
  * The mobile bottom tab bar + desktop left rail. Exactly five slots: four real
  * destinations plus "More", which surfaces everything in PRIMARY_NAV that isn't
- * already a tab (role-gating still applies there). Order is deliberate — Scrims
- * is home, Leaderboards is the showpiece, Events carries the offline-community
- * pillar.
+ * already a tab (role-gating still applies there). Order is deliberate — Home
+ * is the scrim feed, Match is the auto-matchmaking queue, Events carries the
+ * offline-community pillar.
  */
 export const TAB_NAV: NavItem[] = [
-  { href: ROUTES.scrims, label: "Scrims", gameScoped: true },
-  // short tab label — the full destination is "Leaderboards"
-  { href: ROUTES.leaderboards, label: "Ladder", gameScoped: true },
+  { href: ROUTES.scrims, label: "Home", gameScoped: true },
+  { href: ROUTES.match, label: "Match", gameScoped: true },
   { href: ROUTES.teams, label: "Teams", gameScoped: true },
   { href: ROUTES.events, label: "Events", gameScoped: true },
   { href: ROUTES.more, label: "More" },

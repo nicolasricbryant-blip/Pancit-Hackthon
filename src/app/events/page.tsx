@@ -6,7 +6,7 @@ import {
   getAnnouncementsForGame,
   getEventsForGame,
 } from "@/features/events/queries";
-import { EventsFeed } from "@/features/events/EventsFeed";
+import { EventsTabs } from "@/features/events/EventsTabs";
 import { AnnouncementsBoard } from "@/features/events/AnnouncementsBoard";
 import { ExamBanner } from "@/features/events/ExamBanner";
 import styles from "@/features/events/events.module.css";
@@ -57,7 +57,7 @@ export default async function EventsPage({
         </div>
 
         <div className={styles.layout}>
-          <EventsFeed feed={feed} />
+          <EventsTabs upcoming={feed.upcoming} past={feed.past} />
           <AnnouncementsBoard announcements={announcements} />
         </div>
       </div>
