@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono, Montserrat } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { AppHeader } from "@/components/AppHeader";
@@ -9,7 +9,6 @@ import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { NativeFeelGuard } from "@/components/NativeFeelGuard";
 import { SplashScreen } from "@/components/SplashScreen";
 import { SplashController } from "@/components/SplashController";
-import { AuthProvider } from "@/features/auth/AuthProvider";
 import { getCurrentProfile } from "@/features/auth/session";
 import { navRoles } from "@/features/auth/roles";
 
@@ -27,6 +26,16 @@ const body = Inter({
 
 const mono = JetBrains_Mono({
   variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Splash-only — the user specified Montserrat ExtraBold for the loading
+// screen's wordmark/tagline/footer specifically, not a change to the app's
+// display face (--font-display stays Space Grotesk everywhere else).
+const splash = Montserrat({
+  variable: "--font-splash",
+  weight: "800",
   subsets: ["latin"],
   display: "swap",
 });
@@ -61,11 +70,18 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const profile = await getCurrentProfile();
   const roles = navRoles(profile);
+  // First-run onboarding trap (proxy.ts) sends any authed, un-onboarded user
+  // back to /onboarding no matter what they tap — so the tab bar / rail and
+  // game switcher would be dead controls if shown here. Suppress them (and
+  // reduce the header to a non-navigating form) while the gate is active;
+  // `onboarding-gate` on <body> lets globals.css collapse the layout gutters
+  // that assume the tab bar / rail is actually on screen.
+  const onboardingGate = profile != null && !profile.onboarded;
 
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${splash.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -87,17 +103,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body>
-        <AuthProvider profile={profile}>
-          <AppHeader />
+      <body className={onboardingGate ? "onboarding-gate" : undefined}>
+        <AppHeader restricted={onboardingGate} />
+        {!onboardingGate && (
           <Suspense fallback={<div className="game-band" aria-hidden />}>
             <GameBand />
           </Suspense>
-          <main>{children}</main>
+        )}
+        <main>{children}</main>
+        {!onboardingGate && (
           <Suspense fallback={<nav className="app-tabbar" aria-hidden />}>
             <AppNav roles={roles} />
           </Suspense>
-        </AuthProvider>
+        )}
         <ServiceWorkerRegister />
         <NativeFeelGuard />
         <SplashScreen />

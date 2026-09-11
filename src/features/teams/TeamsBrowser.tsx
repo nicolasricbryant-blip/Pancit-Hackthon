@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { TeamCard } from "./TeamCard";
 import type { TeamListItem } from "./types";
 import styles from "./teams.module.css";
@@ -12,20 +12,11 @@ interface Props {
   gameLabel: string;
 }
 
-function SkeletonCard() {
-  return (
-    <div className={styles.skCard} aria-hidden>
-      <div className={`${styles.shimmer} ${styles.skLineLg}`} />
-      <div className={`${styles.shimmer} ${styles.skLineSm}`} />
-      <div className={`${styles.shimmer} ${styles.skLine}`} />
-    </div>
-  );
-}
-
 /**
  * Browse teams in the selected game. Region + school narrow the grid client-side.
- * Mounted with `key={game}` by the page, so a game switch gets fresh filters and
- * a fresh loading pass.
+ * Mounted with `key={game}` by the page, so a game switch gets fresh filters.
+ * `teams` is already server-rendered and present in props, so there's nothing
+ * to wait on — no artificial loading/skeleton pass.
  */
 export function TeamsBrowser({ teams, regions, schools, gameLabel }: Props) {
   const schoolListId = useId();
@@ -34,12 +25,6 @@ export function TeamsBrowser({ teams, regions, schools, gameLabel }: Props) {
   const [school, setSchool] = useState("");
   const [schoolOpen, setSchoolOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
-  }, []);
 
   const schoolMatches = useMemo(() => {
     const q = schoolQuery.trim().toLowerCase();
@@ -219,17 +204,13 @@ export function TeamsBrowser({ teams, regions, schools, gameLabel }: Props) {
         )}
       </div>
 
-      {!loading && (
-        <p className={styles.resultCount}>
-          {results.length} {results.length === 1 ? "team" : "teams"} in{" "}
-          {gameLabel}
-        </p>
-      )}
+      <p className={styles.resultCount}>
+        {results.length} {results.length === 1 ? "team" : "teams"} in{" "}
+        {gameLabel}
+      </p>
 
       <div className={styles.grid}>
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : results.length === 0 ? (
+        {results.length === 0 ? (
           <div className={styles.emptyState}>
             <p>No teams match — widen your filters.</p>
             <button type="button" className={styles.resetBtn} onClick={clearAll}>

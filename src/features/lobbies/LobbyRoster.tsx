@@ -45,14 +45,23 @@ export function LobbyRoster({
     setBusyId(profileId);
     setError(null);
     const supabase = createClient();
-    const { error: delErr } = await supabase
+    // `.delete().eq()` returns `error: null` even when zero rows matched — RLS
+    // filtering it out, or the member already gone. Verify a row actually came
+    // back before treating this as a successful removal.
+    const { data, error: delErr } = await supabase
       .from("lobby_members")
       .delete()
       .eq("lobby_id", lobbyId)
-      .eq("profile_id", profileId);
+      .eq("profile_id", profileId)
+      .select("id")
+      .maybeSingle();
     setBusyId(null);
     if (delErr) {
       setError(delErr.message);
+      return;
+    }
+    if (!data) {
+      setError("Couldn't remove them — they may already be gone.");
       return;
     }
     router.refresh();

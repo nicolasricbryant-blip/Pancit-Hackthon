@@ -66,13 +66,24 @@ export function AvatarUpload({
       data: { publicUrl },
     } = supabase.storage.from("avatars").getPublicUrl(path);
 
-    const { error: dbErr } = await supabase
+    // `.update().eq()` returns `error: null` even when zero rows matched.
+    // Verify a row actually came back before showing the new photo as saved —
+    // otherwise the file is uploaded to storage but the profile never points
+    // at it, and the UI claims success anyway.
+    const { data: savedProfile, error: dbErr } = await supabase
       .from("profiles")
       .update({ avatar_url: publicUrl })
-      .eq("id", userId);
+      .eq("id", userId)
+      .select("id")
+      .maybeSingle();
     if (dbErr) {
       setStatus("idle");
       setErr(dbErr.message);
+      return;
+    }
+    if (!savedProfile) {
+      setStatus("idle");
+      setErr("Couldn't save your photo — sign out and back in, then try again.");
       return;
     }
 
@@ -85,13 +96,19 @@ export function AvatarUpload({
     setErr(null);
     setStatus("uploading");
     const supabase = createClient();
-    const { error: dbErr } = await supabase
+    const { data: savedProfile, error: dbErr } = await supabase
       .from("profiles")
       .update({ avatar_url: null })
-      .eq("id", userId);
+      .eq("id", userId)
+      .select("id")
+      .maybeSingle();
     setStatus("idle");
     if (dbErr) {
       setErr(dbErr.message);
+      return;
+    }
+    if (!savedProfile) {
+      setErr("Couldn't remove your photo — sign out and back in, then try again.");
       return;
     }
     setUrl(null);

@@ -107,13 +107,19 @@ export async function cancelRequest(formData: FormData): Promise<ActionResult> {
   if (!id) return { ok: false, error: "Missing request id." };
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("mentorship_requests")
     .update({ status: "cancelled", updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("mentee_id", userId);
+    .eq("mentee_id", userId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { ok: false, error: error.message };
+  // `.update().eq()` returns `error: null` on zero matched rows too — the
+  // request could belong to someone else, or already be gone. Verify a row
+  // actually came back before reporting success.
+  if (!data) return { ok: false, error: "That request couldn't be found." };
 
   revalidatePath("/mentorship");
   return { ok: true };
@@ -130,13 +136,16 @@ export async function completeRequest(
   if (!id) return { ok: false, error: "Missing request id." };
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("mentorship_requests")
     .update({ status: "completed", updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("mentee_id", userId);
+    .eq("mentee_id", userId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "That request couldn't be found." };
 
   revalidatePath("/mentorship");
   return { ok: true };

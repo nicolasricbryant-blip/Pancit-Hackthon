@@ -20,6 +20,7 @@ export default async function SettingsPage() {
         initialRegion={profile.region ?? ""}
         initialExamMode={profile.exam_mode}
         initialExamModeUntil={profile.exam_mode_until}
+        initialRoles={profile.roles}
       />
     </div>
   );

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { requireProfile } from "@/features/auth/session";
 import { coerceGameId, getGame } from "@/features/games/config";
-import { getMatchesForProfile } from "@/features/matches/queries";
+import { getHandledTeamIds, getMatchesForProfile } from "@/features/matches/queries";
 import { MatchList } from "@/features/matches/MatchList";
+import { IncomingScrimRequests } from "@/features/matches/IncomingScrimRequests";
+import { listIncomingScrimRequests } from "@/features/scrims/queries";
 import styles from "@/features/matches/matches.module.css";
 
 export const metadata: Metadata = { title: "Match Room" };
@@ -23,6 +25,8 @@ export default async function MatchesPage({
   const config = getGame(game);
 
   const { groups, total, hasTeams, teamIds } = await getMatchesForProfile(profile.id);
+  const handledTeamIds = await getHandledTeamIds(profile.id);
+  const incomingRequests = await listIncomingScrimRequests(handledTeamIds);
 
   const scopeStyle: ScopeVars = {
     "--game-current": `var(--game-${game})`,
@@ -44,6 +48,8 @@ export default async function MatchesPage({
           You&apos;re not on a team yet — showing all scrims, read-only.
         </p>
       )}
+
+      <IncomingScrimRequests requests={incomingRequests} />
 
       <MatchList groups={groups} total={total} myTeamIds={teamIds} />
     </div>

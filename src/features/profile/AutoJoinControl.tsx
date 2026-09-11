@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { GameConfig } from "@/features/games/config";
+import { isValidRankRange, type GameConfig } from "@/features/games/config";
 import styles from "@/app/profile/profile.module.css";
 
 export interface AutoJoinPref {
@@ -81,6 +81,10 @@ export function AutoJoinControl({
       setErr("Pick at least one mode.");
       return;
     }
+    if (!isValidRankRange(game.rankTiers, rankMin, rankMax)) {
+      setErr("Rank min can't be higher than rank max.");
+      return;
+    }
     setErr(null);
     setNote(null);
     setStatus("saving");
@@ -108,15 +112,25 @@ export function AutoJoinControl({
   async function turnOff() {
     setStatus("saving");
     const supabase = createClient();
-    const { error } = await supabase
+    // `.update().eq()` returns `error: null` even when zero rows matched (no
+    // prefs row exists yet for this game). Verify a row actually came back
+    // before flipping local state to off, or the switch lies about what's
+    // actually stored.
+    const { data, error } = await supabase
       .from("lobby_autojoin_prefs")
       .update({ enabled: false })
       .eq("profile_id", userId)
-      .eq("game_id", game.id);
+      .eq("game_id", game.id)
+      .select("profile_id")
+      .maybeSingle();
 
     setStatus("idle");
     if (error) {
       setErr(error.message);
+      return;
+    }
+    if (!data) {
+      setErr("Nothing to turn off — no auto-join preference was saved yet.");
       return;
     }
     setEnabled(false);

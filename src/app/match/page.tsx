@@ -26,6 +26,12 @@ export default async function MatchPage({
   let rankMin: string | null = null;
   let rankMax: string | null = null;
   let micOk = true;
+  // Whether auto-join for this game was ALREADY on before this page load —
+  // i.e. a deliberate, persistent opt-in made on /profile. FindMatchLauncher
+  // needs this to tell its own one-shot enable apart from that pre-existing
+  // choice, so cancelling this search can turn auto-join back off without
+  // ever touching a preference the user set deliberately elsewhere.
+  let autojoinEnabled = false;
 
   if (profile) {
     const supabase = await createClient();
@@ -38,7 +44,7 @@ export default async function MatchPage({
         .maybeSingle(),
       supabase
         .from("lobby_autojoin_prefs")
-        .select("rank_min, rank_max, mic_ok")
+        .select("rank_min, rank_max, mic_ok, enabled")
         .eq("profile_id", profile.id)
         .eq("game_id", game)
         .maybeSingle(),
@@ -47,6 +53,7 @@ export default async function MatchPage({
     rankMin = pref?.rank_min ?? null;
     rankMax = pref?.rank_max ?? null;
     micOk = pref?.mic_ok ?? true;
+    autojoinEnabled = pref?.enabled ?? false;
   }
 
   const scopeStyle: ScopeVars = {
@@ -66,6 +73,7 @@ export default async function MatchPage({
           initialRankMin={rankMin}
           initialRankMax={rankMax}
           initialMicOk={micOk}
+          initialAutojoinEnabled={autojoinEnabled}
         />
       </div>
     </div>

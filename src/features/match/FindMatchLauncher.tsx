@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { GameId } from "@/features/games/config";
+import { isValidRankRange, type GameId } from "@/features/games/config";
 import type { LobbyMode } from "@/features/lobbies/queries";
 import styles from "./match.module.css";
 
@@ -35,6 +35,11 @@ interface Props {
   initialRankMin: string | null;
   initialRankMax: string | null;
   initialMicOk: boolean;
+  /** Was auto-join for this game already on (a persistent /profile opt-in)
+   *  before this page loaded? Carried into the searching screen via the `aj`
+   *  query param so Cancel there knows whether THIS search is the one that
+   *  turned auto-join on — see FindingTeammates.cancel(). */
+  initialAutojoinEnabled: boolean;
 }
 
 /**
@@ -53,6 +58,7 @@ export function FindMatchLauncher({
   initialRankMin,
   initialRankMax,
   initialMicOk,
+  initialAutojoinEnabled,
 }: Props) {
   const router = useRouter();
   const [mode, setMode] = useState<LobbyMode>("ranked");
@@ -73,6 +79,10 @@ export function FindMatchLauncher({
       setError("Set a main role for this game in your Profile first.");
       return;
     }
+    if (!isValidRankRange(rankTiers, rankMin || null, rankMax || null)) {
+      setError("Rank min can't be higher than rank max.");
+      return;
+    }
 
     setSearching(true);
     const supabase = createClient();
@@ -85,6 +95,15 @@ export function FindMatchLauncher({
       router.push(`/sign-in?next=${encodeURIComponent(`/match?game=${game}`)}`);
       return;
     }
+
+    // This click is the one turning auto-join on only when it wasn't already
+    // on — i.e. there's no pre-existing, deliberate /profile opt-in. Read
+    // BEFORE the enable_autojoin call below (which always leaves `enabled`
+    // true either way) — it's the only place that can still tell the two
+    // apart. Passed through to the searching screen via `aj=1` so Cancel
+    // there turns auto-join back off only when this search is what started it.
+    const startedAutojoinHere = !initialAutojoinEnabled;
+    const ajParam = startedAutojoinHere ? "&aj=1" : "";
 
     const { data: matchedCount, error: rpcErr } = await supabase.rpc(
       "enable_autojoin",
@@ -117,7 +136,7 @@ export function FindMatchLauncher({
       });
 
       if (hit) {
-        router.push(`/match/${hit.lobby_id}?game=${game}`);
+        router.push(`/match/${hit.lobby_id}?game=${game}${ajParam}`);
         return;
       }
     }
@@ -145,7 +164,7 @@ export function FindMatchLauncher({
       setError(insErr?.message ?? "Could not start a search. Try again.");
       return;
     }
-    router.push(`/match/${created.id}?game=${game}`);
+    router.push(`/match/${created.id}?game=${game}${ajParam}`);
   }
 
   return (

@@ -74,3 +74,23 @@ export function coerceGameId(value: string | string[] | undefined): GameId {
 export function dimToken(game: GameConfig): string {
   return `${game.hueToken}-dim`;
 }
+
+/**
+ * True when `min`/`max` (each a `rankTiers` value, or "" / null for "Any")
+ * form a non-inverted band, i.e. `min`'s index in `rankTiers` is not past
+ * `max`'s. An unrecognized value (shouldn't happen — both come from
+ * `<select>`s built off the same `rankTiers` list) is treated as "Any" so it
+ * never itself trips the check. Used by CreateLobbyForm and
+ * FindMatchLauncher to catch a min > max band before it reaches the DB,
+ * where it would otherwise silently match nobody.
+ */
+export function isValidRankRange(
+  rankTiers: string[],
+  min: string | null,
+  max: string | null,
+): boolean {
+  const lo = min ? rankTiers.indexOf(min) : -1;
+  const hi = max ? rankTiers.indexOf(max) : -1;
+  if (lo < 0 || hi < 0) return true;
+  return lo <= hi;
+}

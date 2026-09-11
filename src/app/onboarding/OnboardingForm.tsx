@@ -187,19 +187,32 @@ export function OnboardingForm({
       return;
     }
 
-    const { error } = await supabase
+    // `.update().eq()` returns `error: null` even when zero rows matched —
+    // RLS filtering the row out, or (accounts predating the handle_new_user
+    // trigger, or created outside that path) no `profiles` row existing at
+    // all. Either way the caller can't tell success from a silent no-op, and
+    // navigating away on a write that wrote nothing just re-traps the user in
+    // the proxy's onboarding gate with no explanation. Upsert instead — it
+    // creates the row if missing (RLS policy `profiles_insert_self` permits
+    // `auth.uid() = id`) — and verify a row actually came back before leaving.
+    const { data: savedProfile, error } = await supabase
       .from("profiles")
-      .update({
-        handle,
-        display_name: displayName.trim(),
-        roles: rolesFromChoice(role),
-        school_id: noSchool ? null : schoolId,
-        school_other: noSchool ? schoolOther.trim() || null : null,
-        region: region.trim() || null,
-        school_verified: !noSchool && schoolVerified,
-        onboarded: true,
-      })
-      .eq("id", user.id);
+      .upsert(
+        {
+          id: user.id,
+          handle,
+          display_name: displayName.trim(),
+          roles: rolesFromChoice(role),
+          school_id: noSchool ? null : schoolId,
+          school_other: noSchool ? schoolOther.trim() || null : null,
+          region: region.trim() || null,
+          school_verified: !noSchool && schoolVerified,
+          onboarded: true,
+        },
+        { onConflict: "id" },
+      )
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       setSubmitting(false);
@@ -209,6 +222,14 @@ export function OnboardingForm({
       } else {
         setFormError(error.message);
       }
+      return;
+    }
+
+    if (!savedProfile) {
+      setSubmitting(false);
+      setFormError(
+        "Couldn't save your profile — sign out and back in, then try again.",
+      );
       return;
     }
 
