@@ -1093,7 +1093,22 @@ body.onboarding-gate main {
   flex-direction: column;
   align-items: center;
   overflow: hidden;
-  background: linear-gradient(180deg, #fbfcfe 0%, #eef1f6 60%, #e4e8f0 100%);
+  /* Real background plate (exported from the source PSD, art-directed light
+     top / navy wedge bottom) — #0a1230 (its own navy) shows through while the
+     image decodes so a slow first paint never flashes white.
+     `center bottom`, not `center top`: on every real *phone* aspect ratio
+     (narrower/taller than the plate's own 9:16 — everything from iPhone 14 at
+     390x844 to the deep 9:19.5+ of a 1179x2556 device) `cover` fills the
+     viewport height with NO vertical crop at all, only shaving the sides, so
+     the anchor doesn't matter there. It matters at wider/shorter aspects
+     (tablet-width viewports like 768x1024, ~4:3): vertical cropping kicks in,
+     and anchoring "top" pushed the crop onto the BOTTOM of the plate — the
+     solid-navy wedge tip .splash-bar / .splash-footer sit on — leaving them
+     on a half-transitioned, low-contrast band instead. Anchoring "bottom"
+     crops from the TOP instead, which is safe: verified with Playwright, the
+     top few hundred px of the plate is a near-uniform near-white gradient
+     with no baked-in shapes, so losing a slice of it is imperceptible. */
+  background: #0a1230 url("/brand/splash-bg.webp") center bottom / cover no-repeat;
   opacity: 1;
   transition: opacity 320ms ease-out;
 }
@@ -1131,8 +1146,10 @@ body.onboarding-gate main {
   width: 100%;
   box-sizing: border-box;
   margin: var(--space-lg) 0 0;
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
+  /* Splash-only face per the source design (Montserrat ExtraBold) — not
+     --font-display (Space Grotesk), which the rest of the app keeps. */
+  font-family: var(--font-splash), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
   font-size: clamp(1.7rem, 8vw, 2.5rem);
   letter-spacing: 0.01em;
   color: #0e1a3a;
@@ -1143,8 +1160,8 @@ body.onboarding-gate main {
   width: 100%;
   box-sizing: border-box;
   margin: var(--space-xs) 0 0;
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
+  font-family: var(--font-splash), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
   font-size: var(--text-xs);
   letter-spacing: 0.06em;
   color: #16234a;
@@ -1153,13 +1170,15 @@ body.onboarding-gate main {
 }
 
 .splash-chevron {
+  /* No longer draws the wedge itself (that's baked into .splash's background
+     plate now) — stays as the flex container that positions .splash-bar and
+     .splash-footer. flex:1 fills whatever space is left under the logo/word/
+     tag stack, same as before. */
   position: relative;
   flex: 1;
   margin-top: var(--space-lg);
   width: 100%;
   min-height: 34vh;
-  clip-path: polygon(0 22%, 50% 0, 100% 22%, 100% 100%, 0 100%);
-  background: linear-gradient(160deg, #16224a 0%, #0a1230 55%, #060a1c 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1167,7 +1186,14 @@ body.onboarding-gate main {
 }
 
 .splash-bar {
-  margin-top: min(14vh, 130px);
+  /* Bottom-anchored (margin-top: auto) rather than offset from the top of
+     .splash-chevron: the chevron's own top edge floats depending on how much
+     room the logo/word/tag stack above it took, but the plate's solid-navy
+     area is reliably the bottom slice of the viewport on every real phone
+     aspect ratio (see the .splash background comment) — so anchoring from
+     the bottom is what actually keeps this on navy instead of the lighter
+     gradient band above it. */
+  margin: auto 0 var(--space-sm);
   width: min(60vw, 260px);
   height: 4px;
   border-radius: 999px;
@@ -1199,8 +1225,14 @@ body.onboarding-gate main {
 }
 
 .splash-footer {
-  margin: auto 0 0;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  /* Directly follows .splash-bar (whose auto top-margin already absorbed all
+     the free space and pushed both of them down together) — not its own
+     auto margin, or the two would split the free space and end up with a
+     large gap between the bar and the footer instead of clustered together
+     near the bottom, on the plate's actual solid-navy pixels. */
+  margin: 0;
+  font-family: var(--font-splash), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
   font-size: var(--text-xs);
   letter-spacing: 0.28em;
   color: oklch(100% 0 0 / 0.45);

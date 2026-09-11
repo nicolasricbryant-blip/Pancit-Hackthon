@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono, Montserrat } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { AppHeader } from "@/components/AppHeader";
@@ -27,6 +27,16 @@ const body = Inter({
 
 const mono = JetBrains_Mono({
   variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Splash-only — the user specified Montserrat ExtraBold for the loading
+// screen's wordmark/tagline/footer specifically, not a change to the app's
+// display face (--font-display stays Space Grotesk everywhere else).
+const splash = Montserrat({
+  variable: "--font-splash",
+  weight: "800",
   subsets: ["latin"],
   display: "swap",
 });
@@ -72,7 +82,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${splash.variable}`}
       suppressHydrationWarning
     >
       <head>
