@@ -49,6 +49,12 @@ create policy scrim_requests_read on public.scrim_requests for select
     or public.is_admin()
   );
 
+-- The anon key is public in the browser, so a hand-rolled PostgREST call is
+-- as reachable as this app's own server actions — RLS is the actual
+-- boundary here, not requestScrim()'s own checks. `to_team` must genuinely
+-- own the (still open) listing being requested, or a handler could name an
+-- arbitrary `to_team` and have their bid show up in an unrelated team's
+-- Match Room against a listing they don't own.
 drop policy if exists scrim_requests_insert_handler on public.scrim_requests;
 create policy scrim_requests_insert_handler on public.scrim_requests for insert
   with check (
@@ -56,18 +62,39 @@ create policy scrim_requests_insert_handler on public.scrim_requests for insert
     and exists (
       select 1 from public.teams t where t.id = from_team and t.handler_id = auth.uid()
     )
+    and exists (
+      select 1 from public.scrim_listings l
+      where l.id = listing_id and l.team_id = to_team and l.status = 'open'
+    )
   );
 
--- Accept/decline (to_team's handler) or cancel (from_team's handler).
+-- Deliberately narrow, not "either party can write any column to any value":
+-- the receiving handler may only decline, the requesting handler may only
+-- cancel their own bid. Accepting does NOT go through RLS at all — it must
+-- run accept_scrim_request(), which books the match, declines the listing's
+-- other bids, and flips the listing to matched atomically. Without this split,
+-- the `with check` from the first draft let the REQUESTER set status =
+-- 'accepted' directly via PostgREST, and the pre-existing
+-- scrim_matches_handler_write policy (either team's handler may insert) would
+-- then let them fabricate a booked match the other side never agreed to.
 drop policy if exists scrim_requests_update_party on public.scrim_requests;
 create policy scrim_requests_update_party on public.scrim_requests for update
   using (
-    exists (select 1 from public.teams t where t.id = to_team and t.handler_id = auth.uid())
-    or exists (select 1 from public.teams t where t.id = from_team and t.handler_id = auth.uid())
+    exists (
+      select 1 from public.teams t
+      where t.id in (from_team, to_team) and t.handler_id = auth.uid()
+    )
   )
   with check (
-    exists (select 1 from public.teams t where t.id = to_team and t.handler_id = auth.uid())
-    or exists (select 1 from public.teams t where t.id = from_team and t.handler_id = auth.uid())
+    (
+      exists (select 1 from public.teams t where t.id = to_team and t.handler_id = auth.uid())
+      and status = 'declined'
+    )
+    or
+    (
+      exists (select 1 from public.teams t where t.id = from_team and t.handler_id = auth.uid())
+      and status = 'cancelled'
+    )
   );
 
 -- ---------------------------------------------------------------------------
@@ -107,6 +134,12 @@ begin
   if not found then
     raise exception 'listing no longer exists';
   end if;
+  -- The request's own 'pending' guard above already covers the realistic
+  -- race (the listing flips to 'matched' as part of accepting some other
+  -- request), but check it here too so the invariant is local and obvious.
+  if v_listing.status <> 'open' then
+    raise exception 'listing is no longer open';
+  end if;
 
   insert into public.scrim_matches
     (listing_id, game_id, team_a, team_b, scheduled_at, format, ruleset, status)
@@ -139,4 +172,9 @@ begin
 end
 $$;
 
+-- `create function` grants EXECUTE to PUBLIC by default. auth.uid() is null
+-- for the anon role so the to_team check above already fails closed, but
+-- revoke first so the authenticated-only grant is explicit rather than
+-- incidental.
+revoke execute on function public.accept_scrim_request(uuid) from public;
 grant execute on function public.accept_scrim_request(uuid) to authenticated;
