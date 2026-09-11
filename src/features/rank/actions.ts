@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/db/types";
 import type { GameId } from "@/features/games/config";
+import { isAdmin } from "@/features/auth/roles";
 import type { RankValues } from "./form";
 
 /**
@@ -13,6 +14,13 @@ import type { RankValues } from "./form";
  * RLS does the real enforcement — `auth.uid() = profile_id` on both
  * `game_profiles` and `rank_submissions`, and `public.is_admin()` on reviews —
  * so every id here is taken from the session, never from client input.
+ *
+ * `approveSubmission`/`rejectSubmission` additionally guard with an explicit
+ * `isAdmin()` check (same pattern as `createTeam`'s `isHandler` check) and
+ * verify row counts on the updates. Without both, a non-admin invoking the
+ * action directly gets RLS-denied updates that report `error: null` with zero
+ * rows affected — a false "success" plus a `revalidatePath`, even though RLS
+ * itself holds and nothing is actually written.
  */
 
 export interface SubmitRankInput {
@@ -80,6 +88,15 @@ export async function approveSubmission(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Your session expired. Sign in again." };
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("roles")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!isAdmin(profile)) {
+    return { error: "Admin role required." };
+  }
+
   const { data: sub, error: subErr } = await supabase
     .from("rank_submissions")
     .select("id, game_profile_id")
@@ -91,21 +108,27 @@ export async function approveSubmission(
 
   const reviewedAt = new Date().toISOString();
 
-  const { error: updErr } = await supabase
+  const { data: updRow, error: updErr } = await supabase
     .from("rank_submissions")
     .update({
       status: "approved",
       reviewed_at: reviewedAt,
       reviewer_id: user.id,
     })
-    .eq("id", submissionId);
+    .eq("id", submissionId)
+    .select("id")
+    .maybeSingle();
   if (updErr) return { error: updErr.message };
+  if (!updRow) return { error: "Could not update the submission." };
 
-  const { error: gpErr } = await supabase
+  const { data: gpRow, error: gpErr } = await supabase
     .from("game_profiles")
     .update({ verification_status: "verified" })
-    .eq("id", sub.game_profile_id);
+    .eq("id", sub.game_profile_id)
+    .select("id")
+    .maybeSingle();
   if (gpErr) return { error: gpErr.message };
+  if (!gpRow) return { error: "Could not update the game profile." };
 
   revalidatePath("/rank/review");
   revalidatePath("/rank");
@@ -125,6 +148,15 @@ export async function rejectSubmission(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Your session expired. Sign in again." };
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("roles")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!isAdmin(profile)) {
+    return { error: "Admin role required." };
+  }
+
   const { data: sub, error: subErr } = await supabase
     .from("rank_submissions")
     .select("id, game_profile_id")
@@ -136,7 +168,7 @@ export async function rejectSubmission(
 
   const reviewedAt = new Date().toISOString();
 
-  const { error: updErr } = await supabase
+  const { data: updRow, error: updErr } = await supabase
     .from("rank_submissions")
     .update({
       status: "rejected",
@@ -144,14 +176,20 @@ export async function rejectSubmission(
       reviewed_at: reviewedAt,
       reviewer_id: user.id,
     })
-    .eq("id", submissionId);
+    .eq("id", submissionId)
+    .select("id")
+    .maybeSingle();
   if (updErr) return { error: updErr.message };
+  if (!updRow) return { error: "Could not update the submission." };
 
-  const { error: gpErr } = await supabase
+  const { data: gpRow, error: gpErr } = await supabase
     .from("game_profiles")
     .update({ verification_status: "rejected" })
-    .eq("id", sub.game_profile_id);
+    .eq("id", sub.game_profile_id)
+    .select("id")
+    .maybeSingle();
   if (gpErr) return { error: gpErr.message };
+  if (!gpRow) return { error: "Could not update the game profile." };
 
   revalidatePath("/rank/review");
   revalidatePath("/rank");

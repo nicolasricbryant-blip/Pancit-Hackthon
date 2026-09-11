@@ -71,7 +71,13 @@ export function SettingsForm({
       ? [...rolesFromChoice(role), "admin"]
       : rolesFromChoice(role);
 
-    const { error } = await supabase
+    // `.update().eq()` returns `error: null` even when zero rows matched —
+    // RLS filtering the row out, or the row not existing at all. Verify a row
+    // actually came back before claiming "Saved." — see OnboardingForm for
+    // the same fix. This matters especially here: a silent no-op on the role
+    // switch leaves the user believing they're a Team Handler when they're
+    // still a Player, with no explanation for why /teams/new then rejects them.
+    const { data: savedProfile, error } = await supabase
       .from("profiles")
       .update({
         display_name: displayName.trim(),
@@ -80,11 +86,17 @@ export function SettingsForm({
         exam_mode_until: examMode && examUntil ? examUntil : null,
         roles,
       })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select("id")
+      .maybeSingle();
 
     setSubmitting(false);
     if (error) {
       setFormError(error.message);
+      return;
+    }
+    if (!savedProfile) {
+      setFormError("Couldn't save your settings — sign out and back in, then try again.");
       return;
     }
     setSaved(true);

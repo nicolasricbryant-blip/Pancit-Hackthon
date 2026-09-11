@@ -95,13 +95,18 @@ export async function closePost(id: string): Promise<ActionResult> {
   if (!userId) return { ok: false, error: "Sign in again." };
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("free_agent_posts")
     .update({ status: "closed" })
     .eq("id", id)
-    .eq("profile_id", userId);
+    .eq("profile_id", userId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { ok: false, error: error.message };
+  // `.update().eq()` reports `error: null` even when zero rows matched (not
+  // the caller's post, or already gone) — verify a row actually came back.
+  if (!data) return { ok: false, error: "That listing couldn't be found." };
 
   revalidatePath("/free-agents");
   return { ok: true };

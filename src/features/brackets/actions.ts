@@ -176,7 +176,7 @@ export async function withdrawTeam(
   const supabase = await createClient();
   const { data: t } = await supabase
     .from("tournaments")
-    .select("id,status")
+    .select("id,status,host_profile_id")
     .eq("slug", slug)
     .maybeSingle();
   if (!t) return { ok: false, error: "Tournament not found." };
@@ -184,13 +184,31 @@ export async function withdrawTeam(
     return { ok: false, error: "Can't withdraw once the bracket is generated." };
   }
 
-  // RLS restricts the delete to the team's handler or the tournament host.
-  const { error } = await supabase
+  // RLS restricts the delete to the team's handler or the tournament host, but
+  // relying on that alone is what made this a false-success bug: a caller who
+  // owns neither gets `error: null` and zero rows deleted, and `ok: true` back
+  // — appearing to have withdrawn a team they don't handle. Check explicitly
+  // before attempting the delete, then verify the delete actually removed a
+  // row (same reasoning as the RLS-only writes flagged elsewhere on this pass).
+  const { data: team } = await supabase
+    .from("teams")
+    .select("handler_id")
+    .eq("id", teamId)
+    .maybeSingle();
+  const isTeamHandler = !!team && team.handler_id === userId;
+  if (!isTeamHandler && !(await canHostManage(userId, t.host_profile_id))) {
+    return { ok: false, error: "Only the team's handler or the host can withdraw this team." };
+  }
+
+  const { data: removed, error } = await supabase
     .from("tournament_entrants")
     .delete()
     .eq("tournament_id", t.id)
-    .eq("team_id", teamId);
+    .eq("team_id", teamId)
+    .select("id")
+    .maybeSingle();
   if (error) return { ok: false, error: error.message };
+  if (!removed) return { ok: false, error: "That team isn't registered." };
 
   revalidatePath(`/brackets/${slug}`);
   revalidatePath(`/brackets/${slug}/manage`);

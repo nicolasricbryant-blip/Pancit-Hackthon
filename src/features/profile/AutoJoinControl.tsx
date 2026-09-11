@@ -108,15 +108,25 @@ export function AutoJoinControl({
   async function turnOff() {
     setStatus("saving");
     const supabase = createClient();
-    const { error } = await supabase
+    // `.update().eq()` returns `error: null` even when zero rows matched (no
+    // prefs row exists yet for this game). Verify a row actually came back
+    // before flipping local state to off, or the switch lies about what's
+    // actually stored.
+    const { data, error } = await supabase
       .from("lobby_autojoin_prefs")
       .update({ enabled: false })
       .eq("profile_id", userId)
-      .eq("game_id", game.id);
+      .eq("game_id", game.id)
+      .select("profile_id")
+      .maybeSingle();
 
     setStatus("idle");
     if (error) {
       setErr(error.message);
+      return;
+    }
+    if (!data) {
+      setErr("Nothing to turn off — no auto-join preference was saved yet.");
       return;
     }
     setEnabled(false);
