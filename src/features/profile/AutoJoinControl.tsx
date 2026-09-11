@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { GameConfig } from "@/features/games/config";
+import { isValidRankRange, type GameConfig } from "@/features/games/config";
 import styles from "@/app/profile/profile.module.css";
 
 export interface AutoJoinPref {
@@ -79,6 +79,10 @@ export function AutoJoinControl({
   async function turnOn() {
     if (modes.length === 0) {
       setErr("Pick at least one mode.");
+      return;
+    }
+    if (!isValidRankRange(game.rankTiers, rankMin, rankMax)) {
+      setErr("Rank min can't be higher than rank max.");
       return;
     }
     setErr(null);
