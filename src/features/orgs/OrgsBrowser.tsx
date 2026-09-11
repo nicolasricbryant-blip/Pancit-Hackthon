@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { OrgCard } from "./OrgCard";
 import { KIND_LABEL, ORG_KINDS, type OrgKind, type OrgListItem } from "./types";
 import styles from "./orgs.module.css";
@@ -10,26 +10,14 @@ interface Props {
   regions: string[];
 }
 
-function SkeletonCard() {
-  return (
-    <div className={styles.skCard} aria-hidden>
-      <div className={`${styles.shimmer} ${styles.skLineLg}`} />
-      <div className={`${styles.shimmer} ${styles.skLineSm}`} />
-      <div className={`${styles.shimmer} ${styles.skLine}`} />
-    </div>
-  );
-}
-
-/** Browse every org. Kind + region narrow the grid client-side. */
+/**
+ * Browse every org. Kind + region narrow the grid client-side. `orgs` is
+ * already server-rendered and present in props, so there's nothing to wait
+ * on — no artificial loading/skeleton pass.
+ */
 export function OrgsBrowser({ orgs, regions }: Props) {
   const [kind, setKind] = useState<OrgKind | "">("");
   const [region, setRegion] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(t);
-  }, []);
 
   const results = useMemo(
     () =>
@@ -105,16 +93,12 @@ export function OrgsBrowser({ orgs, regions }: Props) {
         )}
       </div>
 
-      {!loading && (
-        <p className={styles.resultCount}>
-          {results.length} {results.length === 1 ? "org" : "orgs"}
-        </p>
-      )}
+      <p className={styles.resultCount}>
+        {results.length} {results.length === 1 ? "org" : "orgs"}
+      </p>
 
       <div className={styles.grid}>
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : results.length === 0 ? (
+        {results.length === 0 ? (
           <div className={styles.emptyState}>
             <p>No orgs match — widen your filters.</p>
             <button type="button" className={styles.resetBtn} onClick={clearAll}>

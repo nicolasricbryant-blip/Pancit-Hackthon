@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { GameId } from "@/features/games/config";
+import { isValidRankRange, type GameId } from "@/features/games/config";
 import type { LobbyMode } from "@/features/lobbies/queries";
 import styles from "./match.module.css";
 
@@ -77,6 +77,10 @@ export function FindMatchLauncher({
     }
     if (!hasRole) {
       setError("Set a main role for this game in your Profile first.");
+      return;
+    }
+    if (!isValidRankRange(rankTiers, rankMin || null, rankMax || null)) {
+      setError("Rank min can't be higher than rank max.");
       return;
     }
 

@@ -9,7 +9,6 @@ import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { NativeFeelGuard } from "@/components/NativeFeelGuard";
 import { SplashScreen } from "@/components/SplashScreen";
 import { SplashController } from "@/components/SplashController";
-import { AuthProvider } from "@/features/auth/AuthProvider";
 import { getCurrentProfile } from "@/features/auth/session";
 import { navRoles } from "@/features/auth/roles";
 
@@ -105,20 +104,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className={onboardingGate ? "onboarding-gate" : undefined}>
-        <AuthProvider profile={profile}>
-          <AppHeader restricted={onboardingGate} />
-          {!onboardingGate && (
-            <Suspense fallback={<div className="game-band" aria-hidden />}>
-              <GameBand />
-            </Suspense>
-          )}
-          <main>{children}</main>
-          {!onboardingGate && (
-            <Suspense fallback={<nav className="app-tabbar" aria-hidden />}>
-              <AppNav roles={roles} />
-            </Suspense>
-          )}
-        </AuthProvider>
+        <AppHeader restricted={onboardingGate} />
+        {!onboardingGate && (
+          <Suspense fallback={<div className="game-band" aria-hidden />}>
+            <GameBand />
+          </Suspense>
+        )}
+        <main>{children}</main>
+        {!onboardingGate && (
+          <Suspense fallback={<nav className="app-tabbar" aria-hidden />}>
+            <AppNav roles={roles} />
+          </Suspense>
+        )}
         <ServiceWorkerRegister />
         <NativeFeelGuard />
         <SplashScreen />

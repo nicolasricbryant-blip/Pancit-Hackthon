@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getGame, type GameId } from "@/features/games/config";
+import { getGame, isValidRankRange, type GameId } from "@/features/games/config";
 import { createClient } from "@/lib/supabase/client";
 import type { LobbyMode } from "./queries";
 import styles from "@/app/lobbies/lobbies.module.css";
@@ -51,6 +51,10 @@ export function CreateLobbyForm({ game }: { game: GameId }) {
     const s = Number(slots);
     if (!Number.isInteger(s) || s < 2 || s > 10) {
       setError("Slots must be a whole number between 2 and 10.");
+      return;
+    }
+    if (!isValidRankRange(cfg.rankTiers, rankMin || null, rankMax || null)) {
+      setError("Rank min can't be higher than rank max.");
       return;
     }
 
