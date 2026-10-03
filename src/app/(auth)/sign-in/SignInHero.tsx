@@ -119,7 +119,7 @@ export function SignInHero({ next }: { next: string }) {
         </div>
       </div>
 
-      <p className={styles.footer}>PANCIT HACKTHON</p>
+      <p className={styles.footer}>PANCIT HACKATHON</p>
     </div>
   );
 }
